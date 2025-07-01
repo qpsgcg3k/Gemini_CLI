@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>究極のTODOアプリ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>TODOリスト</h1>
+            <div class="theme-switcher">
+                <i class="fa-solid fa-sun"></i>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <i class="fa-solid fa-moon"></i>
+            </div>
+        </header>
+
+        <div class="input-area">
+            <input type="text" id="task-input" placeholder="新しいタスクを入力">
+            <button id="add-button">追加</button>
+        </div>
+
+        <div class="controls">
+            <div id="filters" class="filters">
+                <button data-filter="all" class="active">すべて</button>
+                <button data-filter="active">未完了</button>
+                <button data-filter="completed">完了済み</button>
+            </div>
+            <span id="task-count"></span>
+        </div>
+
+        <ul id="task-list"></ul>
+
+        <div class="clear-area">
+            <button id="clear-completed-button">完了タスクを一括削除</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
