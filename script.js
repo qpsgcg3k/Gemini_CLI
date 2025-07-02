@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filters = document.getElementById('filters');
     const clearCompletedButton = document.getElementById('clear-completed-button');
     const themeToggle = document.getElementById('theme-toggle');
+    const searchInput = document.getElementById('search-input');
 
     let currentFilter = 'all';
     let draggedItem = null;
@@ -175,10 +176,24 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const filterTasks = () => {
+        const searchTerm = searchInput.value.toLowerCase();
         document.querySelectorAll('#task-list li').forEach(item => {
-            item.classList.remove('hidden');
+            const taskText = item.querySelector('.task-text').textContent.toLowerCase();
             const isCompleted = item.classList.contains('completed');
-            if ((currentFilter === 'active' && isCompleted) || (currentFilter === 'completed' && !isCompleted)) {
+            const matchesSearch = taskText.includes(searchTerm);
+
+            let matchesFilter = false;
+            if (currentFilter === 'all') {
+                matchesFilter = true;
+            } else if (currentFilter === 'active' && !isCompleted) {
+                matchesFilter = true;
+            } else if (currentFilter === 'completed' && isCompleted) {
+                matchesFilter = true;
+            }
+
+            if (matchesFilter && matchesSearch) {
+                item.classList.remove('hidden');
+            } else {
                 item.classList.add('hidden');
             }
         });
@@ -251,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#task-list li.completed').forEach(deleteTask);
     });
     themeToggle.addEventListener('change', toggleTheme);
+    searchInput.addEventListener('input', updateApp);
 
     // --- App Initialization ---
     loadApp();

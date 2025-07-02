@@ -101,6 +101,26 @@ input:checked + .slider:before {
     transform: translateX(20px);
 }
 
+.search-area {
+    margin-bottom: 20px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
 #task-input {
     flex-grow: 1;
     padding: 10px;
