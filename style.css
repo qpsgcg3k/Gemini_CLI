@@ -228,3 +228,34 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 #add-button, .filters button, #clear-completed-button { color: white; border: none; border-radius: 5px; padding: 10px 15px; cursor: pointer; font-size: 16px; }
 .filters button { padding: 5px 10px; }
 #clear-completed-button { padding: 8px 15px; }
+
+.export-area {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+#export-select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+#export-button {
+    background-color: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#export-button:hover {
+    background-color: var(--success-hover-color);
+}

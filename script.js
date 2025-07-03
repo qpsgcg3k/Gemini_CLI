@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearCompletedButton = document.getElementById('clear-completed-button');
     const themeToggle = document.getElementById('theme-toggle');
     const searchInput = document.getElementById('search-input');
+    const exportSelect = document.getElementById('export-select');
+    const exportButton = document.getElementById('export-button');
 
     let currentFilter = 'all';
     let draggedItem = null;
@@ -240,6 +242,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     };
 
+    // --- CSV Export ---
+    const exportTasksToCSV = () => {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const filter = exportSelect.value;
+
+        const filteredTasks = tasks.filter(task => {
+            if (filter === 'all') return true;
+            if (filter === 'active') return !task.completed;
+            if (filter === 'completed') return task.completed;
+            return false;
+        });
+
+        if (filteredTasks.length === 0) {
+            alert('エクスポートするタスクがありません。');
+            return;
+        }
+
+        let csvContent = '\uFEFF';
+        const headers = ['タスク名', '状態', '期日'];
+        csvContent += headers.map(h => `"${h}"`).join(',') + '\r\n';
+
+        filteredTasks.forEach(task => {
+            const status = task.completed ? '完了済み' : '未完了';
+            const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '';
+            const taskText = task.text.replace(/"/g, '""');
+            const row = [`"${taskText}"`, `"${status}"`, `"${dueDate}"`];
+            csvContent += row.join(',') + '\r\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'tasks.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
     // --- Theme Management ---
     const loadTheme = () => {
         if (localStorage.getItem('theme') === 'dark') {
@@ -267,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     themeToggle.addEventListener('change', toggleTheme);
     searchInput.addEventListener('input', updateApp);
+    exportButton.addEventListener('click', exportTasksToCSV);
 
     // --- App Initialization ---
     loadApp();

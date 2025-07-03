@@ -44,6 +44,15 @@
         <div class="clear-area">
             <button id="clear-completed-button">完了タスクを一括削除</button>
         </div>
+
+        <div class="export-area">
+            <select id="export-select">
+                <option value="all">すべて</option>
+                <option value="active">未完了</option>
+                <option value="completed">完了済み</option>
+            </select>
+            <button id="export-button">CSV出力</button>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
