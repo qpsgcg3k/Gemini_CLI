@@ -28,9 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Task Management ---
     const loadTasks = () => {
+        generateRecurringTasks(); // Generate tasks first
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         taskList.innerHTML = '';
-        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate));
+        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate, task.recurrence, task.id));
         updateApp();
     };
 
@@ -38,19 +39,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const tasks = [];
         document.querySelectorAll('#task-list li').forEach(listItem => {
             tasks.push({
+                id: listItem.dataset.id,
                 text: listItem.querySelector('.task-text').textContent,
                 completed: listItem.classList.contains('completed'),
-                dueDate: listItem.dataset.dueDate || null
+                dueDate: listItem.dataset.dueDate || null,
+                recurrence: listItem.dataset.recurrence ? JSON.parse(listItem.dataset.recurrence) : null
             });
         });
         localStorage.setItem('tasks', JSON.stringify(tasks));
     };
 
-    const createTaskElement = (text, completed, dueDate) => {
+    const createTaskElement = (text, completed, dueDate, recurrence, id) => {
         const listItem = document.createElement('li');
         listItem.setAttribute('draggable', 'true');
+        listItem.dataset.id = id || Date.now(); // Assign new ID if none exists
         if (completed) listItem.classList.add('completed');
         if (dueDate) listItem.dataset.dueDate = dueDate;
+        if (recurrence) {
+            listItem.dataset.recurrence = JSON.stringify(recurrence);
+            listItem.classList.add('is-template'); // Add class for templates
+        }
 
         const taskDetails = document.createElement('div');
         taskDetails.classList.add('task-details');
@@ -59,15 +67,31 @@ document.addEventListener('DOMContentLoaded', () => {
         taskSpan.textContent = text;
         taskSpan.classList.add('task-text');
 
+        if (recurrence) {
+            const templateIcon = document.createElement('i');
+            templateIcon.classList.add('fa-solid', 'fa-clone', 'template-icon');
+            taskSpan.prepend(templateIcon);
+        }
+
         const dueDateSpan = document.createElement('span');
         dueDateSpan.classList.add('due-date');
         updateDueDateDisplay(dueDateSpan, dueDate);
 
+        const recurrenceSpan = document.createElement('span');
+        recurrenceSpan.classList.add('recurrence-status');
+        updateRecurrenceDisplay(recurrenceSpan, recurrence);
+
+
         taskDetails.appendChild(taskSpan);
         taskDetails.appendChild(dueDateSpan);
+        taskDetails.appendChild(recurrenceSpan);
 
         const taskActions = document.createElement('div');
         taskActions.classList.add('task-actions');
+
+        const repeatButton = document.createElement('button');
+        repeatButton.innerHTML = '<i class="fa-solid fa-repeat"></i>';
+        repeatButton.classList.add('repeat-button');
 
         const dateButton = document.createElement('button');
         dateButton.innerHTML = '<i class="fa-solid fa-calendar-days"></i>';
@@ -84,10 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Event Listeners for elements
         addDragAndDropListeners(listItem);
         taskSpan.addEventListener('click', () => toggleCompleted(listItem));
+        repeatButton.addEventListener('click', () => editRecurrence(listItem, recurrenceSpan));
         dateButton.addEventListener('click', () => editDueDate(listItem, dueDateSpan));
         editButton.addEventListener('click', () => editTask(listItem, taskSpan));
         deleteButton.addEventListener('click', () => deleteTask(listItem));
 
+        taskActions.appendChild(repeatButton);
         taskActions.appendChild(dateButton);
         taskActions.appendChild(editButton);
         taskActions.appendChild(deleteButton);
@@ -99,13 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const addTask = () => {
         const taskText = taskInput.value.trim();
         if (taskText === '') { alert('タスクを入力してください。'); return; }
-        createTaskElement(taskText, false, null);
+        createTaskElement(taskText, false, null, null, null);
         updateApp();
         taskInput.value = '';
     };
 
     const toggleCompleted = (listItem) => {
-        if (listItem.classList.contains('editing')) return;
+        if (listItem.classList.contains('editing') || listItem.classList.contains('is-template')) return;
         listItem.classList.toggle('completed');
         updateApp();
     };
@@ -168,6 +194,177 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             span.textContent = '';
             span.classList.remove('overdue');
+        }
+    };
+
+    const recurrenceModal = document.getElementById('recurrence-modal');
+    const closeButton = document.querySelector('.close-button');
+    const saveRecurrenceButton = document.getElementById('save-recurrence-button');
+    const cancelRecurrenceButton = document.getElementById('cancel-recurrence-button');
+    const recurrenceType = document.getElementById('recurrence-type');
+    const weeklyOptions = document.getElementById('weekly-options');
+    const monthlyOptions = document.getElementById('monthly-options');
+    const weekdaySelector = document.querySelector('.weekday-selector');
+    const monthlyDayInput = document.getElementById('monthly-day');
+
+    let currentEditingListItem = null;
+
+    // --- Modal --- 
+    const openRecurrenceModal = (listItem) => {
+        currentEditingListItem = listItem;
+        const recurrence = JSON.parse(listItem.dataset.recurrence || 'null');
+
+        // Reset fields
+        recurrenceType.value = 'none';
+        weekdaySelector.querySelectorAll('span').forEach(span => span.classList.remove('selected'));
+        monthlyDayInput.value = '';
+
+        if (recurrence) {
+            recurrenceType.value = recurrence.type;
+            if (recurrence.type === 'weekly') {
+                recurrence.days.forEach(dayIndex => {
+                    weekdaySelector.children[dayIndex].classList.add('selected');
+                });
+            } else if (recurrence.type === 'monthly') {
+                monthlyDayInput.value = recurrence.day;
+            }
+        }
+
+        toggleRecurrenceDetails();
+        recurrenceModal.style.display = 'block';
+    };
+
+    const closeRecurrenceModal = () => {
+        recurrenceModal.style.display = 'none';
+        currentEditingListItem = null;
+    };
+
+    const saveRecurrence = () => {
+        if (!currentEditingListItem) return;
+
+        const type = recurrenceType.value;
+        let recurrence = null;
+
+        if (type !== 'none') {
+            recurrence = { type: type };
+            if (type === 'weekly') {
+                const selectedDays = [];
+                weekdaySelector.querySelectorAll('span.selected').forEach((span, index) => {
+                     // Find the index of the span within its parent
+                    const dayIndex = Array.prototype.indexOf.call(weekdaySelector.children, span);
+                    selectedDays.push(dayIndex);
+                });
+                if (selectedDays.length === 0) { alert('曜日を少なくとも1つ選択してください。'); return; }
+                recurrence.days = selectedDays;
+            } else if (type === 'monthly') {
+                const day = parseInt(monthlyDayInput.value, 10);
+                if (!day || day < 1 || day > 31) { alert('1から31の有効な日付を入力してください。'); return; }
+                recurrence.day = day;
+            }
+        }
+
+        currentEditingListItem.dataset.recurrence = JSON.stringify(recurrence);
+
+        // Update visual indicators immediately
+        const existingIcon = currentEditingListItem.querySelector('.template-icon');
+        if (existingIcon) {
+            existingIcon.remove();
+        }
+
+        if (recurrence) {
+            currentEditingListItem.classList.add('is-template');
+            const templateIcon = document.createElement('i');
+            templateIcon.classList.add('fa-solid', 'fa-clone', 'template-icon');
+            currentEditingListItem.querySelector('.task-text').prepend(templateIcon);
+        } else {
+            currentEditingListItem.classList.remove('is-template');
+        }
+
+        updateRecurrenceDisplay(currentEditingListItem.querySelector('.recurrence-status'), recurrence);
+        updateApp();
+        closeRecurrenceModal();
+    };
+
+    const toggleRecurrenceDetails = () => {
+        weeklyOptions.style.display = recurrenceType.value === 'weekly' ? 'block' : 'none';
+        monthlyOptions.style.display = recurrenceType.value === 'monthly' ? 'block' : 'none';
+    };
+
+
+    const editRecurrence = (listItem) => {
+        openRecurrenceModal(listItem);
+    };
+
+    const updateRecurrenceDisplay = (span, recurrence) => {
+        if (recurrence) {
+            let text = '繰り返し: ';
+            switch(recurrence.type) {
+                case 'daily': text += '毎日'; break;
+                case 'weekly': text += '毎週'; break; // Could be more specific
+                case 'monthly': text += `毎月${recurrence.day}日`; break;
+            }
+            span.textContent = text;
+            span.style.display = 'block';
+        } else {
+            span.textContent = '';
+            span.style.display = 'none';
+        }
+    };
+
+    const generateRecurringTasks = () => {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let newTasksGenerated = false;
+
+        const templates = tasks.filter(t => t.recurrence && t.recurrence.type !== 'none');
+
+        templates.forEach(template => {
+            let lastGenerated = template.recurrence.lastGenerated ? new Date(template.recurrence.lastGenerated) : new Date(parseInt(template.id));
+            lastGenerated.setHours(0, 0, 0, 0);
+
+            let nextDueDate = new Date(lastGenerated);
+
+            while (nextDueDate < today) {
+                // Calculate the next occurrence date
+                switch (template.recurrence.type) {
+                    case 'daily':
+                        nextDueDate.setDate(nextDueDate.getDate() + 1);
+                        break;
+                    case 'weekly':
+                        do {
+                            nextDueDate.setDate(nextDueDate.getDate() + 1);
+                        } while (!template.recurrence.days.includes(nextDueDate.getDay()));
+                        break;
+                    case 'monthly':
+                        // Simple month increment, has edge cases but works for most scenarios
+                        nextDueDate = new Date(nextDueDate.getFullYear(), nextDueDate.getMonth() + 1, template.recurrence.day);
+                        break;
+                }
+
+                if (nextDueDate <= today) {
+                    const dueDateString = nextDueDate.toISOString().split('T')[0];
+                    const taskExists = tasks.some(t => t.templateId === template.id && t.dueDate === dueDateString);
+
+                    if (!taskExists) {
+                        const newTask = {
+                            id: Date.now() + Math.random(), // Unique ID
+                            templateId: template.id,
+                            text: template.text,
+                            completed: false,
+                            dueDate: dueDateString,
+                            recurrence: null
+                        };
+                        tasks.push(newTask);
+                        newTasksGenerated = true;
+                    }
+                }
+            }
+            template.recurrence.lastGenerated = today.toISOString().split('T')[0];
+        });
+
+        if (newTasksGenerated) {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
         }
     };
 
@@ -312,6 +509,22 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggle.addEventListener('change', toggleTheme);
     searchInput.addEventListener('input', updateApp);
     exportButton.addEventListener('click', exportTasksToCSV);
+
+    // --- Modal Event Listeners ---
+    closeButton.addEventListener('click', closeRecurrenceModal);
+    cancelRecurrenceButton.addEventListener('click', closeRecurrenceModal);
+    saveRecurrenceButton.addEventListener('click', saveRecurrence);
+    recurrenceType.addEventListener('change', toggleRecurrenceDetails);
+    weekdaySelector.addEventListener('click', e => {
+        if (e.target.tagName === 'SPAN') {
+            e.target.classList.toggle('selected');
+        }
+    });
+    window.addEventListener('click', e => {
+        if (e.target == recurrenceModal) {
+            closeRecurrenceModal();
+        }
+    });
 
     // --- App Initialization ---
     loadApp();

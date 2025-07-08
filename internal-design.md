@@ -14,9 +14,17 @@
 
 ```javascript
 {
+    id: "一意のID",       // string or number (Date.now()を使用)
     text: "タスクの内容", // string
     completed: false,      // boolean
-    dueDate: "2025-07-04"  // string (YYYY-MM-DD) or null
+    dueDate: "2025-07-04",  // string (YYYY-MM-DD) or null
+    recurrence: {          // object or null (繰り返し設定)
+        type: "daily" | "weekly" | "monthly", // string
+        days: [1, 3, 5],   // array of numbers (weeklyの場合: 0=日, 1=月, ...)
+        day: 15,           // number (monthlyの場合: 1-31)
+        lastGenerated: "2025-07-08" // string (YYYY-MM-DD), 最後にタスクが生成された日付
+    } || null,
+    templateId: "元のテンプレートタスクのID" // string or number, 繰り返しによって生成されたタスクの場合
 }
 ```
 
@@ -32,6 +40,7 @@
 ### 3.1. 初期化処理 (`loadApp`)
 
 - `loadTheme()`: `localStorage` からテーマ設定を読み込み、`body` タグに `dark-mode` クラスを適用する。
+- `generateRecurringTasks()`: 繰り返し設定に基づいて、期限が到来したタスクを自動生成する。
 - `loadTasks()`: `localStorage` からタスクデータを読み込み、`createTaskElement` を使用してタスクリストを再構築する。
 
 ### 3.2. コア機能
@@ -43,15 +52,17 @@
 
 ### 3.3. タスク操作
 
-- **`createTaskElement(text, completed, dueDate)`**:
-    - `<li>` 要素を生成し、タスク名、期日、各種操作ボタン（期日設定、編集、削除）を含むHTMLを構築する。
+- **`createTaskElement(text, completed, dueDate, recurrence, id)`**:
+    - `<li>` 要素を生成し、タスク名、期日、繰り返しステータス、各種操作ボタン（繰り返し設定、期日設定、編集、削除）を含むHTMLを構築する。
     - 各ボタンとタスク名にイベントリスナーを設定する。
     - ドラッグ＆ドロップのためのイベントリスナー (`addDragAndDropListeners`) を設定する。
+    - 繰り返し設定されたタスク（テンプレートタスク）には `is-template` クラスとテンプレートアイコンを追加する。
 - **`addTask()`**:
     - 入力値を取得し、空でなければ `createTaskElement` を呼び出して新しいタスクをDOMに追加する。
     - `updateApp()` を呼び出して状態を更新・保存する。
 - **`toggleCompleted(listItem)`**:
     - `listItem` の `completed` クラスを切り替える。
+    - テンプレートタスクの場合は完了操作を無効にする。
     - `updateApp()` を呼び出す。
 - **`deleteTask(listItem)`**:
     - `listItem` をDOMから削除する。
@@ -62,8 +73,16 @@
 - **`editDueDate(listItem, dueDateSpan)`**:
     - 日付入力用の `<input type="date">` を表示する。
     - 日付が選択されたら、`listItem` の `dataset.dueDate` を更新し、`updateApp()` を呼び出す。
-
-### 3.4. UIとフィルタリング
+- **`editRecurrence(listItem)`**:
+    - 繰り返し設定用のモーダルを表示し、現在のタスクの繰り返し設定を読み込む。
+- **`updateRecurrenceDisplay(span, recurrence)`**:
+    - 繰り返し設定に基づいて、タスクの繰り返しステータス表示を更新する。
+- **`generateRecurringTasks()`**:
+    - `localStorage`からすべてのタスクを読み込む。
+    - 繰り返し設定を持つタスク（テンプレート）を特定する。
+    - 各テンプレートについて、`lastGenerated`の日付から今日までの間に生成されるべきタスクを計算する。
+    - 未生成のタスクがあれば、新しいタスクとしてリストに追加し、`localStorage`を更新する。
+    - テンプレートの`lastGenerated`を今日の日付に更新する。
 
 - **`filterTasks()`**:
     - `currentFilter` 変数と検索入力の値に基づいて、各タスク (`<li>`) に `hidden` クラスを付け外しする。

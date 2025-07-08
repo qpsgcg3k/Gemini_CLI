@@ -54,6 +54,37 @@
             <button id="export-button">CSV出力</button>
         </div>
     </div>
+
+    <!-- Recurrence Modal -->
+    <div id="recurrence-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>繰り返し設定</h2>
+            <div class="recurrence-options">
+                <select id="recurrence-type">
+                    <option value="none">なし</option>
+                    <option value="daily">毎日</option>
+                    <option value="weekly">毎週</option>
+                    <option value="monthly">毎月</option>
+                </select>
+                <div id="weekly-options" class="recurrence-details">
+                    <label>曜日:</label>
+                    <div class="weekday-selector">
+                        <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+                    </div>
+                </div>
+                <div id="monthly-options" class="recurrence-details">
+                    <label for="monthly-day">日付:</label>
+                    <input type="number" id="monthly-day" min="1" max="31">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="save-recurrence-button">保存</button>
+                <button id="cancel-recurrence-button">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

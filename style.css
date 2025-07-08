@@ -208,6 +208,33 @@ li.dragging {
 .delete-button:hover { color: var(--danger-color); }
 .date-button:hover { color: var(--primary-color); }
 
+.repeat-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--sub-text-color);
+    font-size: 16px;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.repeat-button:hover { color: var(--secondary-color); }
+
+.template-icon {
+    margin-right: 8px;
+    color: var(--secondary-color);
+}
+
+.is-template .task-text {
+    cursor: default; /* No hand cursor for templates */
+}
+
+.recurrence-status {
+    font-size: 11px;
+    color: var(--secondary-color);
+    margin-top: 2px;
+}
+
 #clear-completed-button {
     background-color: var(--secondary-color);
 }
@@ -258,4 +285,110 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 
 #export-button:hover {
     background-color: var(--success-hover-color);
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: var(--container-bg-color);
+    margin: 15% auto;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: left;
+}
+
+.close-button {
+    color: var(--sub-text-color);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--text-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.recurrence-options {
+    margin-top: 20px;
+}
+
+.recurrence-options select, .recurrence-options input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.recurrence-details {
+    display: none; /* Hidden by default */
+    margin-top: 15px;
+}
+
+.weekday-selector {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.weekday-selector span {
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    width: 20px; /* Fixed width */
+    height: 20px; /* Fixed height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid transparent;
+}
+
+.weekday-selector span.selected {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-hover-color);
+}
+
+.modal-actions {
+    margin-top: 25px;
+    text-align: right;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#save-recurrence-button {
+    background-color: var(--primary-color);
+    color: white;
+    margin-right: 10px;
+}
+
+#cancel-recurrence-button {
+    background-color: var(--secondary-color);
+    color: white;
 }
