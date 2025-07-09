@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportSelect = document.getElementById('export-select');
     const exportButton = document.getElementById('export-button');
 
-    let currentFilter = 'all';
+    let currentFilter = 'active';
     let draggedItem = null;
 
     // --- Core Functions ---

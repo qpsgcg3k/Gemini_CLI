@@ -49,6 +49,7 @@
 - `loadTheme()`: `localStorage` からテーマ設定を読み込み、`body` タグに `dark-mode` クラスを適用する。
 - `generateRecurringTasks()`: 繰り返し設定に基づいて、期限が到来したタスクを自動生成する。
 - `loadTasks()`: `localStorage` からタスクデータを読み込み、`createTaskElement` を使用してタスクリストを再構築する。
+- `currentFilter` を `'uncompleted'` に初期設定し、`filterTasks()` を呼び出して未完了タスクのみを表示する。
 
 ### 3.2. コア機能
 
