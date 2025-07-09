@@ -343,7 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (nextDueDate <= today) {
-                    const dueDateString = nextDueDate.toISOString().split('T')[0];
+                    const yyyy = nextDueDate.getFullYear();
+                    const mm = String(nextDueDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(nextDueDate.getDate()).padStart(2, '0');
+                    const dueDateString = `${yyyy}-${mm}-${dd}`;
                     const taskExists = tasks.some(t => t.templateId === template.id && t.dueDate === dueDateString);
 
                     if (!taskExists) {
@@ -360,7 +363,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            template.recurrence.lastGenerated = today.toISOString().split('T')[0];
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            template.recurrence.lastGenerated = `${yyyy}-${mm}-${dd}`;
         });
 
         if (newTasksGenerated) {
