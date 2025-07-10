@@ -287,6 +287,112 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
     background-color: var(--success-hover-color);
 }
 
+/* 完了ボタンのスタイル */
+.finish-edit-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: background-color 0.3s;
+}
+
+.finish-edit-button:hover {
+    background-color: var(--primary-hover-color);
+}
+
+/* 新しい入力エリアのスタイル */
+.task-meta-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.task-meta-input input[type="text"],
+.task-meta-input select {
+    flex-grow: 1;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+
+.task-meta-input input[type="text"]:focus,
+.task-meta-input select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* タグと優先度の表示スタイル */
+.task-tags, .task-priority {
+    font-size: 12px;
+    color: var(--sub-text-color);
+    margin-top: 2px;
+    display: block; /* 常にブロック要素として表示 */
+}
+
+.task-priority.priority-high {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+.task-priority.priority-medium {
+    color: orange; /* 適当な色、後で調整 */
+}
+
+.task-priority.priority-low {
+    color: var(--success-color);
+}
+
+/* 編集時の入力フィールドのスタイル */
+.edit-tag-input, .edit-priority-select {
+    flex-grow: 1;
+    font-size: 1em;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid var(--primary-color);
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+    margin-top: 5px; /* テキスト入力との間隔 */
+}
+
+/* フィルタとソートエリアのスタイル */
+.filter-sort-area {
+    display: flex;
+    flex-wrap: wrap; /* 小さい画面で折り返す */
+    gap: 15px;
+    margin-top: 15px;
+    justify-content: center;
+    width: 100%;
+}
+
+.filter-sort-area label {
+    font-size: 14px;
+    color: var(--sub-text-color);
+    margin-right: 5px;
+}
+
+.filter-sort-area select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+.tag-filters, .priority-sort {
+    display: flex;
+    align-items: center;
+}
+
 /* Modal Styles */
 .modal {
     display: none; /* Hidden by default */

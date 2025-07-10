@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const exportSelect = document.getElementById('export-select');
     const exportButton = document.getElementById('export-button');
+    const tagInput = document.getElementById('tag-input');
+    const prioritySelect = document.getElementById('priority-select');
+    const tagFilterSelect = document.getElementById('tag-filter-select');
+    const prioritySortSelect = document.getElementById('priority-sort-select');
 
     let currentFilter = 'active';
     let draggedItem = null;
@@ -18,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateApp = () => {
         saveTasks();
         updateTaskCount();
+        populateTagFilters(); // タグフィルタを更新
         filterTasks();
     };
 
@@ -31,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateRecurringTasks(); // Generate tasks first
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         taskList.innerHTML = '';
-        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate, task.recurrence, task.id));
+        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate, task.recurrence, task.id, task.tags, task.priority)); // tagsとpriorityを渡す
         updateApp();
     };
 
@@ -43,13 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: listItem.querySelector('.task-text').textContent,
                 completed: listItem.classList.contains('completed'),
                 dueDate: listItem.dataset.dueDate || null,
-                recurrence: listItem.dataset.recurrence ? JSON.parse(listItem.dataset.recurrence) : null
+                recurrence: listItem.dataset.recurrence ? JSON.parse(listItem.dataset.recurrence) : null,
+                tags: listItem.dataset.tags ? JSON.parse(listItem.dataset.tags) : [], // tagsを追加
+                priority: listItem.dataset.priority || 'none' // priorityを追加
             });
         });
         localStorage.setItem('tasks', JSON.stringify(tasks));
     };
 
-    const createTaskElement = (text, completed, dueDate, recurrence, id) => {
+    const createTaskElement = (text, completed, dueDate, recurrence, id, tags = [], priority = 'none') => {
         const listItem = document.createElement('li');
         listItem.setAttribute('draggable', 'true');
         listItem.dataset.id = id || Date.now(); // Assign new ID if none exists
@@ -59,6 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
             listItem.dataset.recurrence = JSON.stringify(recurrence);
             listItem.classList.add('is-template'); // Add class for templates
         }
+        if (tags.length > 0) listItem.dataset.tags = JSON.stringify(tags); // tagsをdatasetに保存
+        if (priority !== 'none') listItem.dataset.priority = priority; // priorityをdatasetに保存
 
         const taskDetails = document.createElement('div');
         taskDetails.classList.add('task-details');
@@ -85,6 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
         taskDetails.appendChild(taskSpan);
         taskDetails.appendChild(dueDateSpan);
         taskDetails.appendChild(recurrenceSpan);
+
+        const tagsSpan = document.createElement('span');
+        tagsSpan.classList.add('task-tags');
+        updateTagsDisplay(tagsSpan, tags); // タグ表示を更新
+        taskDetails.appendChild(tagsSpan);
+
+        const prioritySpan = document.createElement('span');
+        prioritySpan.classList.add('task-priority');
+        updatePriorityDisplay(prioritySpan, priority); // 優先度表示を更新
+        taskDetails.appendChild(prioritySpan);
 
         const taskActions = document.createElement('div');
         taskActions.classList.add('task-actions');
@@ -124,10 +143,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const addTask = () => {
         const taskText = taskInput.value.trim();
+        const tags = tagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== ''); // タグを配列として取得
+        const priority = prioritySelect.value; // 優先度を取得
+
         if (taskText === '') { alert('タスクを入力してください。'); return; }
-        createTaskElement(taskText, false, null, null, null);
+        createTaskElement(taskText, false, null, null, null, tags, priority); // tagsとpriorityを渡す
         updateApp();
         taskInput.value = '';
+        tagInput.value = ''; // タグ入力欄をクリア
+        prioritySelect.value = 'none'; // 優先度をリセット
     };
 
     const toggleCompleted = (listItem) => {
@@ -144,26 +168,94 @@ document.addEventListener('DOMContentLoaded', () => {
     const editTask = (listItem, taskSpan) => {
         if (listItem.classList.contains('editing')) return;
         listItem.classList.add('editing');
+        // 編集モード中はドラッグを無効にする
+        listItem.setAttribute('draggable', 'false');
         const originalText = taskSpan.textContent;
+        const originalTags = listItem.dataset.tags ? JSON.parse(listItem.dataset.tags) : [];
+        const originalPriority = listItem.dataset.priority || 'none';
+
         taskSpan.style.display = 'none';
 
         const editInput = document.createElement('input');
         editInput.type = 'text';
         editInput.value = originalText;
         editInput.classList.add('edit-input');
-        listItem.querySelector('.task-details').prepend(editInput);
+
+        const editTagInput = document.createElement('input');
+        editTagInput.type = 'text';
+        editTagInput.value = originalTags.join(', ');
+        editTagInput.classList.add('edit-tag-input');
+        editTagInput.placeholder = 'タグ (カンマ区切り)';
+
+        const editPrioritySelect = document.createElement('select');
+        editPrioritySelect.classList.add('edit-priority-select');
+        const priorities = [{value: 'none', text: '優先度なし'}, {value: 'high', text: '高'}, {value: 'medium', text: '中'}, {value: 'low', text: '低'}];
+        priorities.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.value;
+            option.textContent = p.text;
+            if (p.value === originalPriority) option.selected = true;
+            editPrioritySelect.appendChild(option);
+        });
+
+        // 完了ボタンを追加
+        const finishEditButton = document.createElement('button');
+        finishEditButton.textContent = '完了';
+        finishEditButton.classList.add('finish-edit-button');
+
+        const taskDetails = listItem.querySelector('.task-details');
+        taskDetails.prepend(editInput, editTagInput, editPrioritySelect); // 複数の要素をまとめて追加
+        // 完了ボタンをタスクアクションズに追加
+        listItem.querySelector('.task-actions').prepend(finishEditButton);
+
         editInput.focus();
 
         const finishEditing = () => {
             const newText = editInput.value.trim();
+            const newTags = editTagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+            const newPriority = editPrioritySelect.value;
+
             taskSpan.textContent = newText || originalText;
-            listItem.querySelector('.task-details').removeChild(editInput);
+            listItem.dataset.tags = JSON.stringify(newTags);
+            listItem.dataset.priority = newPriority;
+
+            taskDetails.removeChild(editInput);
+            taskDetails.removeChild(editTagInput);
+            taskDetails.removeChild(editPrioritySelect);
+            // 完了ボタンも削除
+            listItem.querySelector('.task-actions').removeChild(finishEditButton);
             taskSpan.style.display = '';
+
+            // Recurrence icon handling
+            const existingIcon = listItem.querySelector('.template-icon');
+            if (existingIcon) {
+                existingIcon.remove(); // 既存のアイコンを削除して重複を防ぐ
+            }
+            // listItem.dataset.recurrence が存在し、かつその内容が有効な繰り返し設定である場合
+            if (listItem.dataset.recurrence && JSON.parse(listItem.dataset.recurrence)) {
+                listItem.classList.add('is-template');
+                const templateIcon = document.createElement('i');
+                templateIcon.classList.add('fa-solid', 'fa-clone', 'template-icon');
+                taskSpan.prepend(templateIcon);
+            } else {
+                listItem.classList.remove('is-template');
+            }
+
+            // タグと優先度の表示を更新
+            updateTagsDisplay(listItem.querySelector('.task-tags'), newTags);
+            updatePriorityDisplay(listItem.querySelector('.task-priority'), newPriority);
+
             listItem.classList.remove('editing');
+            // 編集完了後にドラッグを有効に戻す
+            listItem.setAttribute('draggable', 'true');
             updateApp();
         };
-        editInput.addEventListener('blur', finishEditing);
-        editInput.addEventListener('keypress', e => { if (e.key === 'Enter') editInput.blur(); });
+        // Enterキーでの完了はそのまま
+        editInput.addEventListener('keypress', e => { if (e.key === 'Enter') finishEditing(); });
+        editTagInput.addEventListener('keypress', e => { if (e.key === 'Enter') finishEditing(); });
+        
+        // 完了ボタンのクリックイベント
+        finishEditButton.addEventListener('click', finishEditing);
     };
 
     const editDueDate = (listItem, dueDateSpan) => {
@@ -311,6 +403,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // --- Helper Functions for Display ---
+    const updateTagsDisplay = (span, tags) => {
+        if (tags && tags.length > 0) {
+            span.textContent = `タグ: ${tags.join(', ')}`;
+            span.style.display = 'block';
+        } else {
+            span.textContent = '';
+            span.style.display = 'none';
+        }
+    };
+
+    const updatePriorityDisplay = (span, priority) => {
+        // 既存の優先度クラスをすべて削除
+        span.classList.remove('priority-high', 'priority-medium', 'priority-low');
+
+        if (priority && priority !== 'none') {
+            let displayPriority = '';
+            switch (priority) {
+                case 'high': displayPriority = '高'; break;
+                case 'medium': displayPriority = '中'; break;
+                case 'low': displayPriority = '低'; break;
+            }
+            span.textContent = `優先度: ${displayPriority}`;
+            span.classList.add(`priority-${priority}`); // スタイル適用のためクラスを追加
+            span.style.display = 'block';
+        } else {
+            span.textContent = '';
+            span.style.display = 'none';
+        }
+    };
+
     const generateRecurringTasks = () => {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const today = new Date();
@@ -374,29 +497,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const populateTagFilters = () => {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const allTags = new Set();
+        tasks.forEach(task => {
+            if (task.tags) {
+                task.tags.forEach(tag => allTags.add(tag));
+            }
+        });
+
+        tagFilterSelect.innerHTML = '<option value="all">すべて</option>'; // デフォルトオプションを保持
+        allTags.forEach(tag => {
+            const option = document.createElement('option');
+            option.value = tag;
+            option.textContent = tag;
+            tagFilterSelect.appendChild(option);
+        });
+        // 現在選択されているタグを保持
+        if (tagFilterSelect.dataset.currentValue) {
+            tagFilterSelect.value = tagFilterSelect.dataset.currentValue;
+        }
+    };
+
     // --- UI & Filters ---
     const updateTaskCount = () => {
         const activeTasks = document.querySelectorAll('#task-list li:not(.completed)').length;
-        taskCount.textContent = `未完了: ${activeTasks}件`;
+        // 繰り返しタスクを除外して未完了タスクをカウント
+        const nonRecurringActiveTasks = Array.from(document.querySelectorAll('#task-list li:not(.completed)')).filter(item => {
+            return !(item.dataset.recurrence && JSON.parse(item.dataset.recurrence));
+        }).length;
+        taskCount.textContent = `未完了: ${nonRecurringActiveTasks}件`;
     };
 
     const filterTasks = () => {
         const searchTerm = searchInput.value.toLowerCase();
-        document.querySelectorAll('#task-list li').forEach(item => {
+        const selectedTag = tagFilterSelect.value; // 選択されたタグを取得
+        const selectedPrioritySort = prioritySortSelect.value; // 選択された優先度ソート順を取得
+
+        let tasksToFilter = Array.from(document.querySelectorAll('#task-list li'));
+
+        // 優先度で並び替え
+        if (selectedPrioritySort !== 'default') {
+            tasksToFilter.sort((a, b) => {
+                const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1, 'none': 0 };
+                const priorityA = priorityOrder[a.dataset.priority || 'none'];
+                const priorityB = priorityOrder[b.dataset.priority || 'none'];
+
+                if (selectedPrioritySort === 'high-to-low') {
+                    return priorityB - priorityA;
+                } else { // low-to-high
+                    return priorityA - priorityB;
+                }
+            });
+            // 並び替えた順にDOMを更新
+            tasksToFilter.forEach(item => taskList.appendChild(item));
+        }
+
+        tasksToFilter.forEach(item => {
             const taskText = item.querySelector('.task-text').textContent.toLowerCase();
             const isCompleted = item.classList.contains('completed');
+            const itemTags = item.dataset.tags ? JSON.parse(item.dataset.tags) : [];
+
             const matchesSearch = taskText.includes(searchTerm);
+            const matchesTag = selectedTag === 'all' || itemTags.includes(selectedTag); // タグフィルタリング
 
             let matchesFilter = false;
             if (currentFilter === 'all') {
                 matchesFilter = true;
             } else if (currentFilter === 'active' && !isCompleted) {
-                matchesFilter = true;
+                // 繰り返し設定があるタスクは未完了フィルタから除外
+                matchesFilter = !(item.dataset.recurrence && JSON.parse(item.dataset.recurrence));
             } else if (currentFilter === 'completed' && isCompleted) {
+                matchesFilter = true;
+            } else if (currentFilter === 'recurring' && item.dataset.recurrence && JSON.parse(item.dataset.recurrence)) { // 繰り返しタスクのフィルタリング
                 matchesFilter = true;
             }
 
-            if (matchesFilter && matchesSearch) {
+            if (matchesFilter && matchesSearch && matchesTag) { // タグフィルタリングも条件に追加
                 item.classList.remove('hidden');
             } else {
                 item.classList.add('hidden');
@@ -463,14 +640,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let csvContent = '\uFEFF';
-        const headers = ['タスク名', '状態', '期日'];
+        const headers = ['タスク名', '状態', '期日', 'タグ', '優先度']; // ヘッダーにタグと優先度を追加
         csvContent += headers.map(h => `"${h}"`).join(',') + '\r\n';
 
         filteredTasks.forEach(task => {
             const status = task.completed ? '完了済み' : '未完了';
             const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '';
             const taskText = task.text.replace(/"/g, '""');
-            const row = [`"${taskText}"`, `"${status}"`, `"${dueDate}"`];
+            const tags = task.tags ? task.tags.join(', ') : ''; // タグをカンマ区切りで取得
+            const priority = task.priority || ''; // 優先度を取得
+
+            const row = [`"${taskText}"`, `"${status}"`, `"${dueDate}"`, `"${tags}"`, `"${priority}"`]; // 行にタグと優先度を追加
             csvContent += row.join(',') + '\r\n';
         });
 
@@ -515,6 +695,11 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggle.addEventListener('change', toggleTheme);
     searchInput.addEventListener('input', updateApp);
     exportButton.addEventListener('click', exportTasksToCSV);
+    tagFilterSelect.addEventListener('change', () => {
+        tagFilterSelect.dataset.currentValue = tagFilterSelect.value; // 選択状態を保持
+        updateApp();
+    });
+    prioritySortSelect.addEventListener('change', updateApp);
 
     // --- Modal Event Listeners ---
     closeButton.addEventListener('click', closeRecurrenceModal);

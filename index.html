@@ -26,6 +26,16 @@
             <button id="add-button">追加</button>
         </div>
 
+        <div class="task-meta-input">
+            <input type="text" id="tag-input" placeholder="タグ (カンマ区切り)">
+            <select id="priority-select">
+                <option value="none">優先度なし</option>
+                <option value="high">高</option>
+                <option value="medium">中</option>
+                <option value="low">低</option>
+            </select>
+        </div>
+
         <div class="search-area">
             <input type="text" id="search-input" placeholder="タスクを検索">
         </div>
@@ -35,8 +45,27 @@
                 <button data-filter="all">すべて</button>
                 <button data-filter="active" class="active">未完了</button>
                 <button data-filter="completed">完了済み</button>
+                <button data-filter="recurring">繰り返し</button>
             </div>
             <span id="task-count"></span>
+
+            <div class="filter-sort-area">
+                <div class="tag-filters">
+                    <label for="tag-filter-select">タグでフィルタ:</label>
+                    <select id="tag-filter-select">
+                        <option value="all">すべて</option>
+                        <!-- タグのオプションはJavaScriptで動的に生成 -->
+                    </select>
+                </div>
+                <div class="priority-sort">
+                    <label for="priority-sort-select">優先度で並び替え:</label>
+                    <select id="priority-sort-select">
+                        <option value="default">デフォルト</option>
+                        <option value="high-to-low">高から低</option>
+                        <option value="low-to-high">低から高</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <ul id="task-list"></ul>
