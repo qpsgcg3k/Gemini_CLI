@@ -143,7 +143,16 @@ input:checked + .slider:before {
 
 #add-button:hover { background-color: var(--primary-hover-color); }
 
+.filters {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px; /* ボタン間の余白 */
+    justify-content: center; /* 中央寄せ */
+    margin-bottom: 15px; /* 下の要素との余白 */
+}
+
 .filters button {
+    flex: 1 1 auto; /* ボタンが均等な幅になるように */
     border: 1px solid var(--border-color);
     color: var(--sub-text-color);
 }
@@ -156,7 +165,10 @@ input:checked + .slider:before {
     color: white;
 }
 
-#task-count { color: var(--sub-text-color); }
+#task-count {
+    color: var(--sub-text-color);
+    white-space: nowrap; /* テキストの折り返しを防ぐ */
+}
 
 li {
     border-bottom: 1px solid var(--border-color);
