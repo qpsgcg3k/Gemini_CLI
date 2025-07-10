@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateRecurringTasks(); // Generate tasks first
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         taskList.innerHTML = '';
-        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate, task.recurrence, task.id, task.tags, task.priority)); // tagsとpriorityを渡す
+        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate, task.recurrence, task.id, task.tags, task.priority, task.createdAt)); // tags, priority, createdAtを渡す
         updateApp();
     };
 
@@ -50,13 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 dueDate: listItem.dataset.dueDate || null,
                 recurrence: listItem.dataset.recurrence ? JSON.parse(listItem.dataset.recurrence) : null,
                 tags: listItem.dataset.tags ? JSON.parse(listItem.dataset.tags) : [], // tagsを追加
-                priority: listItem.dataset.priority || 'none' // priorityを追加
+                priority: listItem.dataset.priority || 'none', // priorityを追加
+                createdAt: listItem.dataset.createdAt || null // createdAtを追加
             });
         });
         localStorage.setItem('tasks', JSON.stringify(tasks));
     };
 
-    const createTaskElement = (text, completed, dueDate, recurrence, id, tags = [], priority = 'none') => {
+    const createTaskElement = (text, completed, dueDate, recurrence, id, tags = [], priority = 'none', createdAt = Date.now()) => {
         const listItem = document.createElement('li');
         listItem.setAttribute('draggable', 'true');
         listItem.dataset.id = id || Date.now(); // Assign new ID if none exists
@@ -68,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (tags.length > 0) listItem.dataset.tags = JSON.stringify(tags); // tagsをdatasetに保存
         if (priority !== 'none') listItem.dataset.priority = priority; // priorityをdatasetに保存
+        listItem.dataset.createdAt = createdAt; // createdAtをdatasetに保存
 
         const taskDetails = document.createElement('div');
         taskDetails.classList.add('task-details');
@@ -104,6 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
         prioritySpan.classList.add('task-priority');
         updatePriorityDisplay(prioritySpan, priority); // 優先度表示を更新
         taskDetails.appendChild(prioritySpan);
+
+        const createdAtSpan = document.createElement('span');
+        createdAtSpan.classList.add('created-at');
+        updateCreatedAtDisplay(createdAtSpan, createdAt); // 作成日表示を更新
+        taskDetails.appendChild(createdAtSpan);
 
         const taskActions = document.createElement('div');
         taskActions.classList.add('task-actions');
@@ -147,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const priority = prioritySelect.value; // 優先度を取得
 
         if (taskText === '') { alert('タスクを入力してください。'); return; }
-        createTaskElement(taskText, false, null, null, null, tags, priority); // tagsとpriorityを渡す
+        createTaskElement(taskText, false, null, null, null, tags, priority, Date.now()); // tags, priority, createdAtを渡す
         updateApp();
         taskInput.value = '';
         tagInput.value = ''; // タグ入力欄をクリア
@@ -434,6 +441,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const updateCreatedAtDisplay = (span, createdAt) => {
+        if (createdAt) {
+            const date = new Date(parseInt(createdAt));
+            span.textContent = `作成日: ${date.toLocaleDateString()}`;
+            span.style.display = 'block';
+        } else {
+            span.textContent = '';
+            span.style.display = 'none';
+        }
+    };
+
     const generateRecurringTasks = () => {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const today = new Date();
@@ -479,7 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             text: template.text,
                             completed: false,
                             dueDate: dueDateString,
-                            recurrence: null
+                            recurrence: null,
+                            createdAt: Date.now() // 作成日を追加
                         };
                         tasks.push(newTask);
                         newTasksGenerated = true;
@@ -640,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let csvContent = '\uFEFF';
-        const headers = ['タスク名', '状態', '期日', 'タグ', '優先度']; // ヘッダーにタグと優先度を追加
+        const headers = ['タスク名', '状態', '期日', 'タグ', '優先度', '作成日']; // ヘッダーに作成日を追加
         csvContent += headers.map(h => `"${h}"`).join(',') + '\r\n';
 
         filteredTasks.forEach(task => {
@@ -649,8 +668,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const taskText = task.text.replace(/"/g, '""');
             const tags = task.tags ? task.tags.join(', ') : ''; // タグをカンマ区切りで取得
             const priority = task.priority || ''; // 優先度を取得
+            const createdAt = task.createdAt ? new Date(parseInt(task.createdAt)).toLocaleDateString() : ''; // 作成日を取得
 
-            const row = [`"${taskText}"`, `"${status}"`, `"${dueDate}"`, `"${tags}"`, `"${priority}"`]; // 行にタグと優先度を追加
+            const row = [`"${taskText}"`, `"${status}"`, `"${dueDate}"`, `"${tags}"`, `"${priority}"`, `"${createdAt}"`]; // 行に作成日を追加
             csvContent += row.join(',') + '\r\n';
         });
 

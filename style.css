@@ -330,7 +330,7 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 }
 
 /* タグと優先度の表示スタイル */
-.task-tags, .task-priority {
+.task-tags, .task-priority, .created-at {
     font-size: 12px;
     color: var(--sub-text-color);
     margin-top: 2px;
