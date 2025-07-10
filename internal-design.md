@@ -7,6 +7,7 @@
 | 1.0.0    | 2025-07-01 | Gemini | 初版作成                                                 |
 | 1.0.1    | 2025-07-09 | Gemini | 繰り返しタスクの期日生成ロジックに関する注意点を追記 |
 | 1.0.2    | 2025-07-10 | Gemini | Issue#4に伴う更新 |
+| 1.0.3    | 2025-07-11 | Gemini | Issue#6に伴う作成日機能の追加 |
 
 ## 1. プロジェクト構成
 
@@ -35,6 +36,7 @@
     templateId: "元のテンプレートタスクのID" // string or number, 繰り返しによって生成されたタスクの場合
     tags: ["仕事", "プライベート"], // array of strings or null
     priority: "high" // "high" | "medium" | "low" or null
+    createdAt: 1678886400000 // number (Unix timestamp in milliseconds)
 }
 ```
 
@@ -63,13 +65,13 @@
 
 ### 3.3. タスク操作
 
-- **`createTaskElement(text, completed, dueDate, recurrence, id)`**:
-    - `<li>` 要素を生成し、タスク名、期日、繰り返しステータス、各種操作ボタン（繰り返し設定、期日設定、編集、削除）を含むHTMLを構築する。
+- **`createTaskElement(text, completed, dueDate, recurrence, id, tags, priority, createdAt)`**: 
+    - `<li>` 要素を生成し、タスク名、期日、繰り返しステータス、各種操作ボタン（繰り返し設定、期日設定、編集、削除）、タグ、優先度、作成日を含むHTMLを構築する。
     - 各ボタンとタスク名にイベントリスナーを設定する。
     - ドラッグ＆ドロップのためのイベントリスナー (`addDragAndDropListeners`) を設定する。
     - 繰り返し設定されたタスク（テンプレートタスク）には `is-template` クラスとテンプレートアイコンを追加する。
-- **`addTask()`**:
-    - 入力値を取得し、空でなければ `createTaskElement` を呼び出して新しいタスクをDOMに追加する。
+- **`addTask()`**: 
+    - 入力値と現在のタイムスタンプ（作成日）を取得し、空でなければ `createTaskElement` を呼び出して新しいタスクをDOMに追加する。
     - `updateApp()` を呼び出して状態を更新・保存する。
 - **`toggleCompleted(listItem)`**:
     - `listItem` の `completed` クラスを切り替える。
@@ -88,11 +90,11 @@
     - 繰り返し設定用のモーダルを表示し、現在のタスクの繰り返し設定を読み込む。
 - **`updateRecurrenceDisplay(span, recurrence)`**:
     - 繰り返し設定に基づいて、タスクの繰り返しステータス表示を更新する。
-- **`generateRecurringTasks()`**:
+- **`generateRecurringTasks()`**: 
     - `localStorage`からすべてのタスクを読み込む。
     - 繰り返し設定を持つタスク（テンプレート）を特定する。
     - 各テンプレートについて、`lastGenerated`の日付から今日までの間に生成されるべきタスクを計算する。
-    - 未生成のタスクがあれば、新しいタスクとしてリストに追加し、`localStorage`を更新する。
+    - 未生成のタスクがあれば、新しいタスクとしてリストに追加し、`localStorage`を更新する。この際、`createdAt`にはタスクが生成された時点のタイムスタンプを設定する。
     - テンプレートの`lastGenerated`を今日の日付に更新する。
     - **注意:** 日付を文字列(`YYYY-MM-DD`)に変換する際は、タイムゾーンの影響を避けるため`toISOString()`は使用せず、`getFullYear()`, `getMonth()`, `getDate()`を元に手動で文字列を組み立てる。
 - **`filterTasks()`**:
@@ -116,7 +118,7 @@
 
 1.  `localStorage` からタスクデータを取得する。
 2.  エクスポート選択ドロップダウンの値に基づいてタスクをフィルタリングする。
-3.  ヘッダー行 (`タスク名,状態,期日`) を作成する。
+3.  ヘッダー行 (`タスク名,状態,期日,タグ,優先度,作成日`) を作成する。
 4.  フィルタリングされた各タスクをCSVの行形式に変換する。
 5.  BOM (`﻿`) を先頭に追加して文字化けを防ぐ。
 6.  `Blob` オブジェクトを生成し、ダウンロード用の `<a>` タグを動的に作成してクリックさせ、CSVファイルをダウンロードさせる。
