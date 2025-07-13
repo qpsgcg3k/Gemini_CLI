@@ -32,11 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Task Management ---
-    const loadTasks = () => {
-        generateRecurringTasks(); // Generate tasks first
+    const loadTasks = async () => { // asyncキーワードを追加
+        await generateRecurringTasks(); // await を使って完了を待つ
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         taskList.innerHTML = '';
-        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate, task.recurrence, task.id, task.tags, task.priority, task.createdAt)); // tags, priority, createdAtを渡す
+        tasks.forEach(task => createTaskElement(task.text, task.completed, task.dueDate, task.recurrence, task.id, task.tags, task.priority, task.createdAt));
         updateApp();
     };
 
@@ -452,15 +452,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const generateRecurringTasks = () => {
+    const generateRecurringTasks = async () => { // asyncキーワードを追加
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         let newTasksGenerated = false;
 
+        // --- 祝日APIからデータを取得 ---
+        let holidays = {};
+        try {
+            const response = await fetch('https://holidays-jp.github.io/api/v1/date.json');
+            if (response.ok) {
+                holidays = await response.json();
+            } else {
+                console.error('祝日APIの取得に失敗しました。');
+            }
+        } catch (error) {
+            console.error('祝日APIへの接続中にエラーが発生しました:', error);
+        }
+        // ------------------------------
+
         const templates = tasks.filter(t => t.recurrence && t.recurrence.type !== 'none');
 
-        templates.forEach(template => {
+        for (const template of templates) { // for...of ループに変更して非同期処理に対応
             let lastGenerated = template.recurrence.lastGenerated ? new Date(template.recurrence.lastGenerated) : new Date(parseInt(template.id));
             lastGenerated.setHours(0, 0, 0, 0);
 
@@ -478,7 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         } while (!template.recurrence.days.includes(nextDueDate.getDay()));
                         break;
                     case 'monthly':
-                        // Simple month increment, has edge cases but works for most scenarios
                         nextDueDate = new Date(nextDueDate.getFullYear(), nextDueDate.getMonth() + 1, template.recurrence.day);
                         break;
                 }
@@ -488,28 +501,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     const mm = String(nextDueDate.getMonth() + 1).padStart(2, '0');
                     const dd = String(nextDueDate.getDate()).padStart(2, '0');
                     const dueDateString = `${yyyy}-${mm}-${dd}`;
-                    const taskExists = tasks.some(t => t.templateId === template.id && t.dueDate === dueDateString);
 
-                    if (!taskExists) {
-                        const newTask = {
-                            id: Date.now() + Math.random(), // Unique ID
-                            templateId: template.id,
-                            text: template.text,
-                            completed: false,
-                            dueDate: dueDateString,
-                            recurrence: null,
-                            createdAt: Date.now() // 作成日を追加
-                        };
-                        tasks.push(newTask);
-                        newTasksGenerated = true;
+                    // --- 土日・祝日チェック ---
+                    const dayOfWeek = nextDueDate.getDay();
+                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                    const isHoliday = holidays[dueDateString];
+
+                    if (!isWeekend && !isHoliday) { // 平日のみタスクを生成
+                        const taskExists = tasks.some(t => t.templateId === template.id && t.dueDate === dueDateString);
+
+                        if (!taskExists) {
+                            const newTask = {
+                                id: Date.now() + Math.random(),
+                                templateId: template.id,
+                                text: template.text,
+                                completed: false,
+                                dueDate: dueDateString,
+                                recurrence: null,
+                                tags: template.tags || [], // タグを継承
+                                priority: template.priority || 'none', // 優先度を継承
+                                createdAt: Date.now()
+                            };
+                            tasks.push(newTask);
+                            newTasksGenerated = true;
+                        }
                     }
+                    // --------------------------
                 }
             }
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
             template.recurrence.lastGenerated = `${yyyy}-${mm}-${dd}`;
-        });
+        }
 
         if (newTasksGenerated) {
             localStorage.setItem('tasks', JSON.stringify(tasks));
