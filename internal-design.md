@@ -9,6 +9,7 @@
 | 1.0.2    | 2025-07-10 | Gemini | Issue#4に伴う更新 |
 | 1.0.3    | 2025-07-11 | Gemini | Issue#6に伴う作成日機能の追加 |
 | 1.0.4    | 2025-07-11 | Gemini | Issue#10に伴うフィルタボタンのレイアウト改善とタスク件数表示の調整 |
+| 1.0.5    | 2025-07-14 | Gemini | Issue#12に伴い、繰り返しタスク生成における土日・祝日除外ロジックについて追記 |
 
 ## 1. プロジェクト構成
 
@@ -53,8 +54,9 @@
 ### 3.1. 初期化処理 (`loadApp`)
 
 - `loadTheme()`: `localStorage` からテーマ設定を読み込み、`body` タグに `dark-mode` クラスを適用する。
-- `generateRecurringTasks()`: 繰り返し設定に基づいて、期限が到来したタスクを自動生成する。
-- `loadTasks()`: `localStorage` からタスクデータを読み込み、`createTaskElement` を使用してタスクリストを再構築する。
+- `loadTasks()`: `async`関数として、以下の処理を順に行う。
+    1.  `generateRecurringTasks()` を `await` で呼び出し、繰り返しタスクの生成を待つ。
+    2.  `localStorage` からタスクデータを読み込み、`createTaskElement` を使用してタスクリストを再構築する。
 - `currentFilter` を `'uncompleted'` に初期設定し、`filterTasks()` を呼び出して未完了タスクのみを表示する。
 
 ### 3.2. コア機能
@@ -94,8 +96,10 @@
 - **`generateRecurringTasks()`**: 
     - `localStorage`からすべてのタスクを読み込む。
     - 繰り返し設定を持つタスク（テンプレート）を特定する。
+    - **祝日判定API (`https://holidays-jp.github.io/api/v1/date.json`) を非同期で呼び出し、祝日リストを取得する。**
     - 各テンプレートについて、`lastGenerated`の日付から今日までの間に生成されるべきタスクを計算する。
-    - 未生成のタスクがあれば、新しいタスクとしてリストに追加し、`localStorage`を更新する。この際、`createdAt`にはタスクが生成された時点のタイムスタンプを設定する。
+    - **計算された日付が土日または祝日でないことを確認する。**
+    - 平日であった場合のみ、未生成のタスクを新しいタスクとしてリストに追加し、`localStorage`を更新する。この際、`createdAt`にはタスクが生成された時点のタイムスタンプを設定する。
     - テンプレートの`lastGenerated`を今日の日付に更新する。
     - **注意:** 日付を文字列(`YYYY-MM-DD`)に変換する際は、タイムゾーンの影響を避けるため`toISOString()`は使用せず、`getFullYear()`, `getMonth()`, `getDate()`を元に手動で文字列を組み立てる。
 - **`filterTasks()`**:
