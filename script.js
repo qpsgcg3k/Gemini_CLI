@@ -139,6 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
         editButton.addEventListener('click', () => editTask(listItem, taskSpan));
         deleteButton.addEventListener('click', () => deleteTask(listItem));
 
+        if (completed) {
+            repeatButton.disabled = true;
+            dateButton.disabled = true;
+            editButton.disabled = true;
+        }
+
         taskActions.appendChild(repeatButton);
         taskActions.appendChild(dateButton);
         taskActions.appendChild(editButton);
@@ -164,6 +170,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleCompleted = (listItem) => {
         if (listItem.classList.contains('editing') || listItem.classList.contains('is-template')) return;
         listItem.classList.toggle('completed');
+
+        const repeatButton = listItem.querySelector('.repeat-button');
+        const dateButton = listItem.querySelector('.date-button');
+        const editButton = listItem.querySelector('.edit-button');
+
+        if (listItem.classList.contains('completed')) {
+            repeatButton.disabled = true;
+            dateButton.disabled = true;
+            editButton.disabled = true;
+        } else {
+            repeatButton.disabled = false;
+            dateButton.disabled = false;
+            editButton.disabled = false;
+        }
+
         updateApp();
     };
 
@@ -173,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const editTask = (listItem, taskSpan) => {
+        if (listItem.classList.contains('completed')) return;
         if (listItem.classList.contains('editing')) return;
         listItem.classList.add('editing');
         // 編集モード中はドラッグを無効にする
@@ -266,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const editDueDate = (listItem, dueDateSpan) => {
+        if (listItem.classList.contains('completed')) return;
         const dateInput = document.createElement('input');
         dateInput.type = 'date';
         dateInput.value = listItem.dataset.dueDate || '';
@@ -391,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     const editRecurrence = (listItem) => {
+        if (listItem.classList.contains('completed')) return;
         openRecurrenceModal(listItem);
     };
 

@@ -510,3 +510,9 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
     background-color: var(--secondary-color);
     color: white;
 }
+
+/* Disabled button style */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
