@@ -79,17 +79,21 @@
 - **`toggleCompleted(listItem)`**:
     - `listItem` の `completed` クラスを切り替える。
     - テンプレートタスクの場合は完了操作を無効にする。
+    - **完了状態に応じて、関連する操作ボタン（編集、期日、繰り返し）の `disabled` 属性を切り替える。**
     - `updateApp()` を呼び出す。
 - **`deleteTask(listItem)`**:
     - `listItem` をDOMから削除する。
     - `updateApp()` を呼び出す。
 - **`editTask(listItem, taskSpan)`**:
+    - **タスクが完了状態の場合は処理を中断する。**
     - `taskSpan` を非表示にし、代わりに `<input>` 要素を挿入して編集モードにする。
     - `blur` または `keypress` イベントで編集を完了し、`updateApp()` を呼び出す。
 - **`editDueDate(listItem, dueDateSpan)`**:
+    - **タスクが完了状態の場合は処理を中断する。**
     - 日付入力用の `<input type="date">` を表示する。
     - 日付が選択されたら、`listItem` の `dataset.dueDate` を更新し、`updateApp()` を呼び出す。
 - **`editRecurrence(listItem)`**:
+    - **タスクが完了状態の場合は処理を中断する。**
     - 繰り返し設定用のモーダルを表示し、現在のタスクの繰り返し設定を読み込む。
 - **`updateRecurrenceDisplay(span, recurrence)`**:
     - 繰り返し設定に基づいて、タスクの繰り返しステータス表示を更新する。
