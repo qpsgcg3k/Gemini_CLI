@@ -24,6 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTaskCount();
         populateTagFilters(); // タグフィルタを更新
         filterTasks();
+        // 「完了タスクを一括削除」ボタンの表示制御
+        if (currentFilter === 'completed') {
+            clearCompletedButton.style.display = 'block';
+        } else {
+            clearCompletedButton.style.display = 'none';
+        }
     };
 
     const loadApp = () => {
