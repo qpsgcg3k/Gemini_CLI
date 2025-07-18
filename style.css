@@ -143,27 +143,7 @@ input:checked + .slider:before {
 
 #add-button:hover { background-color: var(--primary-hover-color); }
 
-.filters {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 10px; /* ボタン間の余白 */
-    justify-content: center; /* 中央寄せ */
-    margin-bottom: 15px; /* 下の要素との余白 */
-}
 
-.filters button {
-    flex: 1 1 auto; /* ボタンが均等な幅になるように */
-    border: 1px solid var(--border-color);
-    color: var(--sub-text-color);
-}
-
-.filters button:hover { background-color: var(--border-color); }
-
-.filters button.active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
 
 #task-count {
     color: var(--sub-text-color);
@@ -400,7 +380,7 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
     font-size: 14px;
 }
 
-.tag-filters, .priority-sort {
+.tag-filters, .priority-sort, .filter-select-area {
     display: flex;
     align-items: center;
 }

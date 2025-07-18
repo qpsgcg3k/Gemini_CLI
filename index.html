@@ -40,14 +40,17 @@
             <input type="text" id="search-input" placeholder="タスクを検索">
         </div>
 
-        <div class="controls">
-            <div id="filters" class="filters">
-                <button data-filter="all">すべて</button>
-                <button data-filter="active" class="active">未完了</button>
-                <button data-filter="completed">完了済み</button>
-                <button data-filter="recurring">繰り返し</button>
-            </div>
-            <span id="task-count"></span>
+        <div class="filter-sort-area">
+                <div class="filter-select-area">
+                    <label for="filter-select">表示フィルタ:</label>
+                    <select id="filter-select">
+                        <option value="all">すべて</option>
+                        <option value="active">未完了</option>
+                        <option value="completed">完了済み</option>
+                        <option value="recurring">繰り返し</option>
+                    </select>
+                </div>
+                <span id="task-count"></span>
 
             <div class="filter-sort-area">
                 <div class="tag-filters">

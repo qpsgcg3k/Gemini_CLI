@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addButton = document.getElementById('add-button');
     const taskList = document.getElementById('task-list');
     const taskCount = document.getElementById('task-count');
-    const filters = document.getElementById('filters');
+    const filterSelect = document.getElementById('filter-select');
     const clearCompletedButton = document.getElementById('clear-completed-button');
     const themeToggle = document.getElementById('theme-toggle');
     const searchInput = document.getElementById('search-input');
@@ -646,10 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.classList.add('hidden');
             }
         });
-        document.querySelectorAll('.filters button').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.filter === currentFilter);
-        });
-    };
+        };
 
     // --- Drag and Drop ---
     const addDragAndDropListeners = (item) => {
@@ -751,11 +748,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Event Listeners ---
     addButton.addEventListener('click', addTask);
     taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTask(); });
-    filters.addEventListener('click', e => {
-        if (e.target.tagName === 'BUTTON') {
-            currentFilter = e.target.dataset.filter;
-            updateApp();
-        }
+    filterSelect.addEventListener('change', e => {
+        currentFilter = e.target.value;
+        updateApp();
     });
     clearCompletedButton.addEventListener('click', () => {
         document.querySelectorAll('#task-list li.completed').forEach(deleteTask);
