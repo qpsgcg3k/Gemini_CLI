@@ -14,7 +14,7 @@
             <div class="theme-switcher">
                 <i class="fa-solid fa-sun"></i>
                 <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
+                    <input type="checkbox" id="theme-toggle" aria-label="テーマを切り替える">
                     <span class="slider round"></span>
                 </label>
                 <i class="fa-solid fa-moon"></i>
@@ -22,13 +22,13 @@
         </header>
 
         <div class="input-area">
-            <input type="text" id="task-input" placeholder="新しいタスクを入力">
-            <button id="add-button">追加</button>
+            <input type="text" id="task-input" placeholder="新しいタスクを入力" aria-label="新しいタスク">
+            <button id="add-button" aria-label="タスクを追加">追加</button>
         </div>
 
         <div class="task-meta-input">
-            <input type="text" id="tag-input" placeholder="タグ (カンマ区切り)">
-            <select id="priority-select">
+            <input type="text" id="tag-input" placeholder="タグ (カンマ区切り)" aria-label="タグ">
+            <select id="priority-select" aria-label="優先度">
                 <option value="none">優先度なし</option>
                 <option value="high">高</option>
                 <option value="medium">中</option>
@@ -37,13 +37,13 @@
         </div>
 
         <div class="search-area">
-            <input type="text" id="search-input" placeholder="タスクを検索">
+            <input type="text" id="search-input" placeholder="タスクを検索" aria-label="タスクを検索">
         </div>
 
         <div class="filter-sort-area">
                 <div class="filter-select-area">
                     <label for="filter-select">表示フィルタ:</label>
-                    <select id="filter-select">
+                    <select id="filter-select" aria-label="表示フィルタ">
                         <option value="all">すべて</option>
                         <option value="active">未完了</option>
                         <option value="completed">完了済み</option>
@@ -55,14 +55,14 @@
             <div class="filter-sort-area">
                 <div class="tag-filters">
                     <label for="tag-filter-select">タグでフィルタ:</label>
-                    <select id="tag-filter-select">
+                    <select id="tag-filter-select" aria-label="タグでフィルタ">
                         <option value="all">すべて</option>
                         <!-- タグのオプションはJavaScriptで動的に生成 -->
                     </select>
                 </div>
                 <div class="priority-sort">
                     <label for="priority-sort-select">優先度で並び替え:</label>
-                    <select id="priority-sort-select">
+                    <select id="priority-sort-select" aria-label="優先度で並び替え">
                         <option value="default">デフォルト</option>
                         <option value="high-to-low">高から低</option>
                         <option value="low-to-high">低から高</option>
@@ -74,26 +74,26 @@
         <ul id="task-list"></ul>
 
         <div class="clear-area">
-            <button id="clear-completed-button">完了タスクを一括削除</button>
+            <button id="clear-completed-button" aria-label="完了タスクを一括削除">完了タスクを一括削除</button>
         </div>
 
         <div class="export-area">
-            <select id="export-select">
+            <select id="export-select" aria-label="エクスポート対象のタスク">
                 <option value="all">すべて</option>
                 <option value="active">未完了</option>
                 <option value="completed">完了済み</option>
             </select>
-            <button id="export-button">CSV出力</button>
+            <button id="export-button" aria-label="CSV形式でタスクをエクスポート">CSV出力</button>
         </div>
     </div>
 
     <!-- Recurrence Modal -->
     <div id="recurrence-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
+            <button class="close-button" aria-label="閉じる">&times;</button>
             <h2>繰り返し設定</h2>
             <div class="recurrence-options">
-                <select id="recurrence-type">
+                <select id="recurrence-type" aria-label="繰り返し種別">
                     <option value="none">なし</option>
                     <option value="daily">毎日</option>
                     <option value="weekly">毎週</option>
@@ -107,12 +107,12 @@
                 </div>
                 <div id="monthly-options" class="recurrence-details">
                     <label for="monthly-day">日付:</label>
-                    <input type="number" id="monthly-day" min="1" max="31">
+                    <input type="number" id="monthly-day" min="1" max="31" aria-label="毎月の日にち">
                 </div>
             </div>
             <div class="modal-actions">
-                <button id="save-recurrence-button">保存</button>
-                <button id="cancel-recurrence-button">キャンセル</button>
+                <button id="save-recurrence-button" aria-label="繰り返し設定を保存">保存</button>
+                <button id="cancel-recurrence-button" aria-label="繰り返し設定をキャンセル">キャンセル</button>
             </div>
         </div>
     </div>
