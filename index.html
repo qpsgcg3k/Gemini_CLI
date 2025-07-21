@@ -41,33 +41,30 @@
         </div>
 
         <div class="filter-sort-area">
-                <div class="filter-select-area">
-                    <label for="filter-select">表示フィルタ:</label>
-                    <select id="filter-select" aria-label="表示フィルタ">
-                        <option value="all">すべて</option>
-                        <option value="active">未完了</option>
-                        <option value="completed">完了済み</option>
-                        <option value="recurring">繰り返し</option>
-                    </select>
-                </div>
-                <span id="task-count"></span>
-
-            <div class="filter-sort-area">
-                <div class="tag-filters">
-                    <label for="tag-filter-select">タグでフィルタ:</label>
-                    <select id="tag-filter-select" aria-label="タグでフィルタ">
-                        <option value="all">すべて</option>
-                        <!-- タグのオプションはJavaScriptで動的に生成 -->
-                    </select>
-                </div>
-                <div class="priority-sort">
-                    <label for="priority-sort-select">優先度で並び替え:</label>
-                    <select id="priority-sort-select" aria-label="優先度で並び替え">
-                        <option value="default">デフォルト</option>
-                        <option value="high-to-low">高から低</option>
-                        <option value="low-to-high">低から高</option>
-                    </select>
-                </div>
+            <div class="filter-select-area">
+                <label for="filter-select">表示フィルタ:</label>
+                <select id="filter-select" aria-label="表示フィルタ">
+                    <option value="all">すべて</option>
+                    <option value="active">未完了</option>
+                    <option value="completed">完了済み</option>
+                    <option value="recurring">繰り返し</option>
+                </select>
+            </div>
+            <span id="task-count"></span>
+            <div class="tag-filters">
+                <label for="tag-filter-select">タグでフィルタ:</label>
+                <select id="tag-filter-select" aria-label="タグでフィルタ">
+                    <option value="all">すべて</option>
+                    <!-- タグのオプションはJavaScriptで動的に生成 -->
+                </select>
+            </div>
+            <div class="priority-sort">
+                <label for="priority-sort-select">優先度で並び替え:</label>
+                <select id="priority-sort-select" aria-label="優先度で並び替え">
+                    <option value="default">デフォルト</option>
+                    <option value="high-to-low">高から低</option>
+                    <option value="low-to-high">低から高</option>
+                </select>
             </div>
         </div>
 
