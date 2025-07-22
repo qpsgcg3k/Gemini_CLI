@@ -1,0 +1,1 @@
+feat: Add Japanese language support and development workflow guidelines to Gemini.md

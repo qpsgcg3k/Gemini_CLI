@@ -298,7 +298,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateInput = document.createElement('input');
         dateInput.type = 'date';
         dateInput.value = listItem.dataset.dueDate || '';
-        dateInput.style.marginLeft = '10px';
         listItem.querySelector('.task-actions').prepend(dateInput);
         dateInput.focus();
 

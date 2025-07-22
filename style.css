@@ -1,30 +1,56 @@
 :root {
-    --bg-color: #f4f7f9;
-    --container-bg-color: #ffffff;
-    --text-color: #333333;
-    --sub-text-color: #777777;
-    --border-color: #eeeeee;
-    --primary-color: #007bff;
-    --primary-hover-color: #0056b3;
-    --danger-color: #dc3545;
-    --danger-hover-color: #c82333;
-    --success-color: #28a745;
-    --success-hover-color: #218838;
-    --secondary-color: #6c757d;
-    --secondary-hover-color: #5a6268;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --overdue-color: #e63946;
+    /* Primary Colors */
+    --blue-500: #3B82F6; /* Main Blue */
+    --blue-600: #2563EB; /* Dark Blue (Hover) */
+    --blue-700: #1D4ED8; /* Emphasized Blue (Info) */
+    --blue-800: #1E40AF; /* Super Emphasized Blue */
+    --blue-50: #EFF6FF;  /* Light Blue */
+    --blue-100: #DBEAFE; /* Middle Blue */
+
+    /* Grayscale Colors (Light Mode) */
+    --gray-900: #111827; /* Text Main */
+    --gray-700: #374151; /* Text Sub */
+    --gray-600: #4B5563; /* Text Caption */
+    --gray-500: #6B7280; /* Faint Text */
+    --gray-300: #D1D5DB; /* Border */
+    --gray-200: #E5E7EB; /* Light Border */
+    --white: #FFFFFF;    /* Background */
+    --gray-50: #F9FAFB;  /* Section Background */
+
+    /* System Colors */
+    --green-600: #059669; /* Success */
+    --amber-600: #D97706; /* Warning */
+    --red-600: #DC2626;   /* Error */
+
+    /* Mapped Variables */
+    --bg-color: var(--white); /* Default light background */
+    --container-bg-color: var(--white);
+    --text-color: var(--gray-900);
+    --sub-text-color: var(--gray-700);
+    --border-color: var(--gray-300);
+    --primary-color: var(--blue-500);
+    --primary-hover-color: var(--blue-600);
+    --danger-color: var(--red-600);
+    --danger-hover-color: var(--red-600); /* DESIGN_RULE.md doesn't specify danger hover, using same as danger */
+    --success-color: var(--green-600);
+    --success-hover-color: var(--green-600); /* DESIGN_RULE.md doesn't specify success hover, using same as success */
+    --secondary-color: var(--gray-700); /* For secondary button text */
+    --secondary-hover-color: var(--gray-600); /* For secondary button hover text */
+    --shadow-color: rgba(0, 0, 0, 0.05); /* shadow-sm */
+    --overdue-color: var(--red-600); /* Overdue is an error/danger state */
+    --warning-color: var(--amber-600); /* New variable */
+    --info-color: var(--blue-700); /* New variable */
 }
 
 body.dark-mode {
-    --bg-color: #1a1a2e;
-    --container-bg-color: #16213e;
-    --text-color: #e9ecef;
-    --sub-text-color: #adb5bd;
-    --border-color: #3a3a5c;
-    --primary-color: #0f3460;
-    --primary-hover-color: #274a78;
-    --shadow-color: rgba(0, 0, 0, 0.4);
+    --bg-color: var(--gray-900); /* Dark background */
+    --container-bg-color: var(--gray-800); /* Slightly lighter dark for container */
+    --text-color: var(--gray-50); /* Light text */
+    --sub-text-color: var(--gray-300); /* Lighter sub text */
+    --border-color: var(--gray-700); /* Darker border */
+    --primary-color: var(--blue-500); /* Primary color remains blue */
+    --primary-hover-color: var(--blue-600); /* Primary hover remains blue */
+    --shadow-color: rgba(0, 0, 0, 0.4); /* Darker shadow for dark mode */
 }
 
 body {
@@ -36,15 +62,15 @@ body {
     align-items: flex-start;
     min-height: 100vh;
     margin: 0;
-    padding: 40px 0;
+    padding: 32px 0; /* py-8 (32px) */
     transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
     background-color: var(--container-bg-color);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px var(--shadow-color);
+    padding: 24px; /* p-6 (24px) */
+    border-radius: 16px; /* rounded-2xl (16px) */
+    box-shadow: 0 1px 2px var(--shadow-color); /* shadow-sm */
     width: 100%;
     max-width: 500px;
     text-align: center;
@@ -55,14 +81,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .theme-switcher {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--sub-text-color);
+    color: var(--gray-600); /* Text caption */
 }
 
 .switch {
@@ -78,7 +104,7 @@ body {
     position: absolute;
     cursor: pointer;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #ccc;
+    background-color: var(--gray-300); /* Border color for inactive state */
     transition: .4s;
     border-radius: 24px;
 }
@@ -88,7 +114,7 @@ body {
     content: "";
     height: 18px; width: 18px;
     left: 3px; bottom: 3px;
-    background-color: white;
+    background-color: var(--white); /* White thumb */
     transition: .4s;
     border-radius: 50%;
 }
@@ -102,62 +128,77 @@ input:checked + .slider:before {
 }
 
 .search-area {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #search-input {
     width: 100%;
     padding: 10px;
-    border: 2px solid var(--border-color);
-    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px; /* rounded-lg */
     font-size: 16px;
     background-color: var(--bg-color);
     color: var(--text-color);
     box-sizing: border-box;
+    min-height: 48px; /* h-12 */
 }
 
 #search-input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--blue-500); /* border-blue-500 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-2 ring-blue-500 ring-opacity-20 */
 }
 
 #task-input {
     flex-grow: 1;
     padding: 10px;
-    border: 2px solid var(--border-color);
-    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px; /* rounded-lg */
     font-size: 16px;
     background-color: var(--bg-color);
     color: var(--text-color);
+    min-height: 48px; /* h-12 */
 }
 
 #task-input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--blue-500); /* border-blue-500 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-2 ring-blue-500 ring-opacity-20 */
 }
 
 #add-button {
     background-color: var(--primary-color);
-    transition: background-color 0.3s;
+    color: white;
+    border: none;
+    border-radius: 12px; /* rounded-xl */
+    padding: 12px 24px; /* px-6 py-3 */
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600; /* font-semibold */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); /* shadow-md */
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-#add-button:hover { background-color: var(--primary-hover-color); }
+#add-button:hover {
+    background-color: var(--primary-hover-color);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* shadow-lg */
+}
 
 
 
 #task-count {
-    color: var(--sub-text-color);
+    color: var(--gray-600); /* Text caption */
     white-space: nowrap; /* テキストの折り返しを防ぐ */
 }
 
 li {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--gray-200); /* Light border */
     transition: background-color 0.2s, opacity 0.4s;
 }
 
 li.dragging {
     opacity: 0.5;
-    background: var(--primary-color);
+    background: var(--blue-500); /* Main blue */
 }
 
 .task-details {
@@ -173,7 +214,7 @@ li.dragging {
 
 .due-date {
     font-size: 12px;
-    color: var(--sub-text-color);
+    color: var(--gray-600); /* Text caption */
 }
 
 .due-date.overdue {
@@ -184,37 +225,30 @@ li.dragging {
 .task-actions {
     display: flex;
     align-items: center;
+    gap: 8px; /* standard spacing */
 }
 
-.edit-button, .delete-button, .date-button {
+.edit-button, .delete-button, .date-button, .repeat-button {
     background-color: transparent;
     border: none;
     cursor: pointer;
     color: var(--sub-text-color);
     font-size: 16px;
-    padding: 5px;
-    transition: color 0.3s;
+    padding: 12px; /* p-3 (12px) */
+    border-radius: 50%; /* rounded-full */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
+    transition: color 0.3s, box-shadow 0.3s, background-color 0.3s;
 }
 
-.edit-button:hover { color: var(--success-color); }
-.delete-button:hover { color: var(--danger-color); }
-.date-button:hover { color: var(--primary-color); }
+.edit-button:hover { color: var(--success-color); background-color: var(--gray-50); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); }
+.delete-button:hover { color: var(--danger-color); background-color: var(--gray-50); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); }
+.date-button:hover { color: var(--primary-color); background-color: var(--gray-50); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); }
 
-.repeat-button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--sub-text-color);
-    font-size: 16px;
-    padding: 5px;
-    transition: color 0.3s;
-}
-
-.repeat-button:hover { color: var(--secondary-color); }
+.repeat-button:hover { color: var(--secondary-color); background-color: var(--gray-50); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); }
 
 .template-icon {
     margin-right: 8px;
-    color: var(--secondary-color);
+    color: var(--gray-600); /* Text caption */
 }
 
 .is-template .task-text {
@@ -223,33 +257,73 @@ li.dragging {
 
 .recurrence-status {
     font-size: 11px;
-    color: var(--secondary-color);
+    color: var(--gray-600); /* Text caption */
     margin-top: 2px;
 }
 
 #clear-completed-button {
-    background-color: var(--secondary-color);
+    background-color: var(--white); /* Secondary button background */
+    color: var(--blue-700); /* Secondary button text */
+    border: 2px solid var(--blue-700); /* Secondary button border */
+    border-radius: 12px; /* rounded-xl */
+    padding: 12px 24px; /* px-6 py-3 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
 }
 
-#clear-completed-button:hover { background-color: var(--secondary-hover-color); }
+#clear-completed-button:hover {
+    background-color: var(--blue-50); /* Secondary button hover background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); /* shadow-md */
+}
+
+#clear-completed-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--blue-500), 0 0 0 5px var(--white); /* ring-2 ring-blue-500 ring-offset-2 */
+}
 
 /* Inherited styles from previous steps that need slight adjustments */
-.input-area { display: flex; margin-bottom: 20px; }
-h1 { color: var(--text-color); }
-ul { list-style: none; padding: 0; margin: 0; text-align: left; }
-li { display: flex; align-items: center; padding: 12px 10px; }
+.input-area { display: flex; margin-bottom: 16px; }
+h1 {
+    color: var(--text-color);
+    font-size: 30px; /* text-3xl */
+    font-weight: 600; /* font-semibold */
+    line-height: 1.25; /* leading-tight */
+}
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* Removed margin-top and margin-bottom */
+    text-align: left;
+}
+li {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px; /* py-3 px-4 */
+}
 li:last-child { border-bottom: none; }
 li.hidden { display: none; }
-li.completed .task-text { text-decoration: line-through; color: var(--sub-text-color); }
-.edit-input { flex-grow: 1; font-size: 1em; padding: 0; border: none; border-bottom: 1px solid var(--primary-color); outline: none; background: transparent; color: var(--text-color); }
-.controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }
-.clear-area { margin-top: 20px; text-align: right; }
+li.completed .task-text { text-decoration: line-through; color: var(--gray-500); /* Faint text */ }
+.edit-input {
+    flex-grow: 1;
+    font-size: 1em;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid var(--blue-500); /* border-blue-500 */
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+}
+
+.edit-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-2 ring-blue-500 ring-opacity-20 */
+}
+.controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; /* standard spacing */ padding: 0 5px; }
+.clear-area { margin-top: 24px; /* medium spacing */ text-align: right; }
 #add-button, .filters button, #clear-completed-button { color: white; border: none; border-radius: 5px; padding: 10px 15px; cursor: pointer; font-size: 16px; }
 .filters button { padding: 5px 10px; }
 #clear-completed-button { padding: 8px 15px; }
 
 .export-area {
-    margin-top: 20px;
+    margin-top: 24px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -258,73 +332,97 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 
 #export-select {
     padding: 8px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    border-radius: 8px; /* rounded-lg */
+    border: 1px solid var(--gray-300); /* Border color */
+    background-color: var(--white); /* Background color */
+    color: var(--gray-700); /* Text color */
 }
 
 #export-button {
-    background-color: var(--success-color);
+    background-color: var(--green-600);
     color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 15px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    border-radius: 12px; /* rounded-xl */
+    padding: 12px 24px; /* px-6 py-3 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); /* shadow-md */
 }
 
 #export-button:hover {
-    background-color: var(--success-hover-color);
+    background-color: var(--green-600); /* DESIGN_RULE.md doesn't specify success hover, using same as success */
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* shadow-lg */
+}
+
+#export-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--green-600), 0 0 0 5px var(--white); /* ring-2 ring-green-600 ring-offset-2 */
+}
+
+/* General button styles based on DESIGN_RULE.md */
+button {
+    font-weight: 600; /* font-semibold */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s, transform 0.3s;
+    border-radius: 8px; /* rounded-lg as a default for small buttons */
+    padding: 10px 12px; /* px-3 py-2.5 equivalent */
+    min-height: 44px; /* Minimum touch target */
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-color); /* Default text color */
+    background-color: var(--container-bg-color); /* Default background */
 }
 
 /* 完了ボタンのスタイル */
 .finish-edit-button {
     background-color: var(--primary-color);
     color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 14px;
+    border-radius: 12px; /* rounded-xl */
+    padding: 12px 24px; /* px-6 py-3 */
+    font-size: 16px;
     margin-left: 10px;
-    transition: background-color 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); /* shadow-md */
 }
 
 .finish-edit-button:hover {
     background-color: var(--primary-hover-color);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* shadow-lg */
+}
+
+.finish-edit-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--blue-500), 0 0 0 5px var(--white); /* ring-2 ring-blue-500 ring-offset-2 */
 }
 
 /* 新しい入力エリアのスタイル */
 .task-meta-input {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .task-meta-input input[type="text"],
 .task-meta-input select {
     flex-grow: 1;
     padding: 10px;
-    border: 2px solid var(--border-color);
-    border-radius: 5px;
+    border: 1px solid var(--gray-300); /* Border color */
+    border-radius: 8px; /* rounded-lg */
     font-size: 16px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: var(--white); /* Background color */
+    color: var(--gray-700); /* Text color */
     box-sizing: border-box;
+    min-height: 48px; /* h-12 */
 }
 
 .task-meta-input input[type="text"]:focus,
 .task-meta-input select:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--blue-500); /* border-blue-500 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-2 ring-blue-500 ring-opacity-20 */
 }
 
 /* タグと優先度の表示スタイル */
 .task-tags, .task-priority, .created-at {
     font-size: 12px;
-    color: var(--sub-text-color);
+    color: var(--gray-600); /* Text caption */
     margin-top: 2px;
     display: block; /* 常にブロック要素として表示 */
 }
@@ -335,7 +433,7 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 }
 
 .task-priority.priority-medium {
-    color: orange; /* 適当な色、後で調整 */
+    color: var(--amber-600); /* Warning color */
 }
 
 .task-priority.priority-low {
@@ -348,35 +446,40 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
     font-size: 1em;
     padding: 0;
     border: none;
-    border-bottom: 1px solid var(--primary-color);
+    border-bottom: 1px solid var(--gray-300); /* Border color */
     outline: none;
     background: transparent;
     color: var(--text-color);
     margin-top: 5px; /* テキスト入力との間隔 */
 }
 
+.edit-tag-input:focus, .edit-priority-select:focus {
+    border-color: var(--blue-500); /* border-blue-500 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-2 ring-blue-500 ring-opacity-20 */
+}
+
 /* フィルタとソートエリアのスタイル */
 .filter-sort-area {
     display: flex;
     flex-wrap: wrap; /* 小さい画面で折り返す */
-    gap: 15px;
-    margin-top: 15px;
+    gap: 16px;
+    margin-top: 16px;
     justify-content: center;
     width: 100%;
 }
 
 .filter-sort-area label {
     font-size: 14px;
-    color: var(--sub-text-color);
+    color: var(--gray-600); /* Text caption */
     margin-right: 5px;
 }
 
 .filter-sort-area select {
     padding: 8px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    border-radius: 8px; /* rounded-lg */
+    border: 1px solid var(--gray-300); /* Border color */
+    background-color: var(--white); /* Background color */
+    color: var(--gray-700); /* Text color */
     font-size: 14px;
 }
 
@@ -401,17 +504,17 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 .modal-content {
     background-color: var(--container-bg-color);
     margin: 15% auto;
-    padding: 25px;
+    padding: 24px; /* p-6 */
     border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border-radius: 24px; /* rounded-3xl */
     width: 80%;
     max-width: 400px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 20px 25px rgba(0,0,0,0.1); /* shadow-xl */
     text-align: left;
 }
 
 .close-button {
-    color: var(--sub-text-color);
+    color: var(--gray-600); /* Text caption */
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -419,42 +522,42 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 
 .close-button:hover,
 .close-button:focus {
-    color: var(--text-color);
+    color: var(--gray-900); /* Text main */
     text-decoration: none;
     cursor: pointer;
 }
 
 .recurrence-options {
-    margin-top: 20px;
+    margin-top: 16px;
 }
 
 .recurrence-options select, .recurrence-options input {
     width: 100%;
     padding: 10px;
-    margin-top: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    margin-top: 8px; /* standard spacing */
+    border: 1px solid var(--gray-300); /* Border color */
+    border-radius: 8px; /* rounded-lg */
+    background-color: var(--white); /* Background color */
+    color: var(--gray-700); /* Text color */
 }
 
 .recurrence-details {
     display: none; /* Hidden by default */
-    margin-top: 15px;
+    margin-top: 16px;
 }
 
 .weekday-selector {
     display: flex;
     justify-content: space-between;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .weekday-selector span {
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
-    width: 20px; /* Fixed width */
-    height: 20px; /* Fixed height */
+    width: 32px; /* Fixed width for touch target */
+    height: 32px; /* Fixed height for touch target */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -468,13 +571,13 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
 }
 
 .modal-actions {
-    margin-top: 25px;
+    margin-top: 24px; /* medium spacing */
     text-align: right;
 }
 
 .modal-actions button {
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 24px; /* px-6 py-3 */
+    border-radius: 12px; /* rounded-xl */
     border: none;
     cursor: pointer;
     font-size: 16px;
@@ -484,11 +587,38 @@ li.completed .task-text { text-decoration: line-through; color: var(--sub-text-c
     background-color: var(--primary-color);
     color: white;
     margin-right: 10px;
+    border-radius: 12px; /* rounded-xl */
+    padding: 12px 24px; /* px-6 py-3 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); /* shadow-md */
+}
+
+#save-recurrence-button:hover {
+    background-color: var(--primary-hover-color);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* shadow-lg */
+}
+
+#save-recurrence-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--blue-500), 0 0 0 5px var(--white); /* ring-2 ring-blue-500 ring-offset-2 */
 }
 
 #cancel-recurrence-button {
-    background-color: var(--secondary-color);
-    color: white;
+    background-color: var(--white); /* Secondary button background */
+    color: var(--blue-700); /* Secondary button text */
+    border: 2px solid var(--blue-700); /* Secondary button border */
+    border-radius: 12px; /* rounded-xl */
+    padding: 12px 24px; /* px-6 py-3 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
+}
+
+#cancel-recurrence-button:hover {
+    background-color: var(--blue-50); /* Secondary button hover background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); /* shadow-md */
+}
+
+#cancel-recurrence-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--blue-500), 0 0 0 5px var(--white); /* ring-2 ring-blue-500 ring-offset-2 */
 }
 
 /* Disabled button style */
