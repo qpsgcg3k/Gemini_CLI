@@ -124,18 +124,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const repeatButton = document.createElement('button');
         repeatButton.innerHTML = '<i class="fa-solid fa-repeat"></i>';
         repeatButton.classList.add('repeat-button');
+        repeatButton.setAttribute('aria-label', '繰り返し設定');
 
         const dateButton = document.createElement('button');
         dateButton.innerHTML = '<i class="fa-solid fa-calendar-days"></i>';
         dateButton.classList.add('date-button');
+        dateButton.setAttribute('aria-label', '期日設定');
 
         const editButton = document.createElement('button');
         editButton.innerHTML = '<i class="fa-solid fa-pencil"></i>';
         editButton.classList.add('edit-button');
+        editButton.setAttribute('aria-label', 'タスクを編集');
 
         const deleteButton = document.createElement('button');
         deleteButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
         deleteButton.classList.add('delete-button');
+        deleteButton.setAttribute('aria-label', 'タスクを削除');
 
         // Event Listeners for elements
         addDragAndDropListeners(listItem);
