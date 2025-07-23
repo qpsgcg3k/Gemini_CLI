@@ -1,3 +1,58 @@
+
+
+let currentFilter = 'active';
+let searchInput;
+
+const populateTagFilters = (doc, tasks, filter = 'all', searchTerm = '') => {
+    const tagFilterSelect = doc.getElementById('tag-filter-select');
+    if (!tagFilterSelect) return;
+
+    // 1. Filter tasks based on the current view (filter and search)
+    const filteredTasks = tasks.filter(task => {
+        const isCompleted = task.completed;
+        const taskText = task.text.toLowerCase();
+
+        const matchesSearch = searchTerm ? taskText.includes(searchTerm) : true;
+
+        let matchesFilter = false;
+        if (filter === 'all') {
+            matchesFilter = true;
+        } else if (filter === 'active' && !isCompleted) {
+            matchesFilter = !(task.recurrence && task.recurrence.type !== 'none');
+        } else if (filter === 'completed' && isCompleted) {
+            matchesFilter = true;
+        } else if (filter === 'recurring' && task.recurrence && task.recurrence.type !== 'none') {
+            matchesFilter = true;
+        }
+        return matchesFilter && matchesSearch;
+    });
+
+    // 2. Extract tags from the filtered tasks
+    const tags = new Set();
+    filteredTasks.forEach(task => {
+        if (task.tags) {
+            task.tags.forEach(tag => tags.add(tag));
+        }
+    });
+
+    // 3. Populate the select element
+    const currentValue = tagFilterSelect.value;
+    tagFilterSelect.innerHTML = '<option value="all">すべて</option>';
+    tags.forEach(tag => {
+        const option = doc.createElement('option');
+        option.value = tag;
+        option.textContent = tag;
+        tagFilterSelect.appendChild(option);
+    });
+
+    // Restore selection if possible
+    if (Array.from(tagFilterSelect.options).some(opt => opt.value === currentValue)) {
+        tagFilterSelect.value = currentValue;
+    } else {
+        tagFilterSelect.value = 'all';
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const taskInput = document.getElementById('task-input');
@@ -7,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterSelect = document.getElementById('filter-select');
     const clearCompletedButton = document.getElementById('clear-completed-button');
     const themeToggle = document.getElementById('theme-toggle');
-    const searchInput = document.getElementById('search-input');
+    searchInput = document.getElementById('search-input');
     const exportSelect = document.getElementById('export-select');
     const exportButton = document.getElementById('export-button');
     const tagInput = document.getElementById('tag-input');
@@ -15,14 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const tagFilterSelect = document.getElementById('tag-filter-select');
     const prioritySortSelect = document.getElementById('priority-sort-select');
 
-    let currentFilter = 'active';
     let draggedItem = null;
 
     // --- Core Functions ---
     const updateApp = () => {
         saveTasks();
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         updateTaskCount();
-        populateTagFilters(); // タグフィルタを更新
+        populateTagFilters(document, tasks, currentFilter, searchInput.value.toLowerCase()); // フィルタと検索語を渡す
         filterTasks();
         // 「完了タスクを一括削除」ボタンの表示制御
         if (currentFilter === 'completed') {
@@ -573,28 +628,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const populateTagFilters = () => {
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const allTags = new Set();
-        tasks.forEach(task => {
-            if (task.tags) {
-                task.tags.forEach(tag => allTags.add(tag));
-            }
-        });
-
-        tagFilterSelect.innerHTML = '<option value="all">すべて</option>'; // デフォルトオプションを保持
-        allTags.forEach(tag => {
-            const option = document.createElement('option');
-            option.value = tag;
-            option.textContent = tag;
-            tagFilterSelect.appendChild(option);
-        });
-        // 現在選択されているタグを保持
-        if (tagFilterSelect.dataset.currentValue) {
-            tagFilterSelect.value = tagFilterSelect.dataset.currentValue;
-        }
-    };
-
     // --- UI & Filters ---
     const updateTaskCount = () => {
         const activeTasks = document.querySelectorAll('#task-list li:not(.completed)').length;
@@ -713,18 +746,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let csvContent = '\uFEFF';
-        const headers = ['タスク名', '状態', '期日', 'タグ', '優先度', '作成日']; // ヘッダーに作成日を追加
+        const headers = ['タスク名', '状態', '期日', 'タグ', '優先度', '作成日'];
         csvContent += headers.map(h => `"${h}"`).join(',') + '\r\n';
 
         filteredTasks.forEach(task => {
             const status = task.completed ? '完了済み' : '未完了';
             const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '';
             const taskText = task.text.replace(/"/g, '""');
-            const tags = task.tags ? task.tags.join(', ') : ''; // タグをカンマ区切りで取得
-            const priority = task.priority || ''; // 優先度を取得
-            const createdAt = task.createdAt ? new Date(parseInt(task.createdAt)).toLocaleDateString() : ''; // 作成日を取得
+            const tags = task.tags ? task.tags.join(', ') : '';
+            const priority = task.priority || '';
+            const createdAt = task.createdAt ? new Date(parseInt(task.createdAt)).toLocaleDateString() : '';
 
-            const row = [`"${taskText}"`, `"${status}"`, `"${dueDate}"`, `"${tags}"`, `"${priority}"`, `"${createdAt}"`]; // 行に作成日を追加
+            const row = [`"${taskText}"`, `"${status}"`, `"${dueDate}"`, `"${tags}"`, `"${priority}"`, `"${createdAt}"`];
             csvContent += row.join(',') + '\r\n';
         });
 
@@ -774,21 +807,35 @@ document.addEventListener('DOMContentLoaded', () => {
     prioritySortSelect.addEventListener('change', updateApp);
 
     // --- Modal Event Listeners ---
-    closeButton.addEventListener('click', closeRecurrenceModal);
-    cancelRecurrenceButton.addEventListener('click', closeRecurrenceModal);
-    saveRecurrenceButton.addEventListener('click', saveRecurrence);
-    recurrenceType.addEventListener('change', toggleRecurrenceDetails);
-    weekdaySelector.addEventListener('click', e => {
+    const modalElements = {
+        recurrenceModal: document.getElementById('recurrence-modal'),
+        closeButton: document.querySelector('.close-button'),
+        saveRecurrenceButton: document.getElementById('save-recurrence-button'),
+        cancelRecurrenceButton: document.getElementById('cancel-recurrence-button'),
+        recurrenceType: document.getElementById('recurrence-type'),
+        weekdaySelector: document.querySelector('.weekday-selector')
+    };
+
+    modalElements.closeButton.addEventListener('click', closeRecurrenceModal);
+    modalElements.cancelRecurrenceButton.addEventListener('click', closeRecurrenceModal);
+    modalElements.saveRecurrenceButton.addEventListener('click', saveRecurrence);
+    modalElements.recurrenceType.addEventListener('change', toggleRecurrenceDetails);
+    modalElements.weekdaySelector.addEventListener('click', e => {
         if (e.target.tagName === 'SPAN') {
             e.target.classList.toggle('selected');
         }
     });
     window.addEventListener('click', e => {
-        if (e.target == recurrenceModal) {
+        if (e.target == modalElements.recurrenceModal) {
             closeRecurrenceModal();
         }
     });
 
     // --- App Initialization ---
+    filterSelect.value = currentFilter; // 画面起動時に表示フィルタを未完了に設定
     loadApp();
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { populateTagFilters };
+}
