@@ -1,1 +1,1 @@
-fix: ドキュメントとコードの整合性を修正
+feat: Issue #26 - Implement dynamic tag filtering and initial filter state

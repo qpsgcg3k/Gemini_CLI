@@ -14,6 +14,7 @@
 | 1.0.7    | 2025-07-18 | Gemini | Issue#19に伴う「完了タスクを一括削除」ボタンの表示制御 |
 | 1.0.8    | 2025-07-19 | Gemini | Issue#17に伴うアクセシビリティ対応（aria-labelの追加） |
 | 1.0.9    | 2025-07-21 | Gemini | Issue#25に伴うHTML構造の修正 |
+| 1.0.10   | 2025-07-23 | Gemini | Issue#26に伴うタグフィルタの連動、テスト環境導入、起動時フィルタ状態の修正 |
 
 ## 1. プロジェクト構成
 
@@ -61,7 +62,7 @@
 - `loadTasks()`: `async`関数として、以下の処理を順に行う。
     1.  `generateRecurringTasks()` を `await` で呼び出し、繰り返しタスクの生成を待つ。
     2.  `localStorage` からタスクデータを読み込み、`createTaskElement` を使用してタスクリストを再構築する。
-- `currentFilter` を `'uncompleted'` に初期設定し、`filterTasks()` を呼び出して未完了タスクのみを表示する。
+- `currentFilter` を `'active'` に初期設定し、`filterSelect` の値も `'active'` に設定する。その後、`filterTasks()` を呼び出して未完了タスクのみを表示する。
 
 ### 3.2. コア機能
 
