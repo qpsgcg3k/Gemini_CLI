@@ -53,6 +53,96 @@ const populateTagFilters = (doc, tasks, filter = 'all', searchTerm = '') => {
     }
 };
 
+const HOLIDAY_API_ERROR_MESSAGE = '祝日APIの取得に失敗しました。オフラインの場合、祝日でもタスクが生成される可能性があります。';
+
+const generateRecurringTasks = async () => { // asyncキーワードを追加
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let newTasksGenerated = false;
+
+    // --- 祝日APIからデータを取得 ---
+    let holidays = {};
+    try {
+        const response = await fetch('https://holidays-jp.github.io/api/v1/date.json');
+        if (response.ok) {
+            holidays = await response.json();
+        } else {
+            alert(HOLIDAY_API_ERROR_MESSAGE);
+        }
+    } catch (error) {
+        alert(HOLIDAY_API_ERROR_MESSAGE);
+    }
+    // ------------------------------
+
+    const templates = tasks.filter(t => t.recurrence && t.recurrence.type !== 'none');
+
+    for (const template of templates) { // for...of ループに変更して非同期処理に対応
+        let lastGenerated = template.recurrence.lastGenerated ? new Date(template.recurrence.lastGenerated) : new Date(parseInt(template.id));
+        lastGenerated.setHours(0, 0, 0, 0);
+
+        let nextDueDate = new Date(lastGenerated);
+
+        while (nextDueDate < today) {
+            // Calculate the next occurrence date
+            switch (template.recurrence.type) {
+                case 'daily':
+                    nextDueDate.setDate(nextDueDate.getDate() + 1);
+                    break;
+                case 'weekly':
+                    do {
+                        nextDueDate.setDate(nextDueDate.getDate() + 1);
+                    } while (!template.recurrence.days.includes(nextDueDate.getDay()));
+                    break;
+                case 'monthly':
+                    nextDueDate = new Date(nextDueDate.getFullYear(), nextDueDate.getMonth() + 1, template.recurrence.day);
+                    break;
+            }
+
+            if (nextDueDate <= today) {
+                const yyyy = nextDueDate.getFullYear();
+                const mm = String(nextDueDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(nextDueDate.getDate()).padStart(2, '0');
+                const dueDateString = `${yyyy}-${mm}-${dd}`;
+
+                // --- 土日・祝日チェック ---
+                const dayOfWeek = nextDueDate.getDay();
+                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                const isHoliday = holidays[dueDateString];
+
+                if (!isWeekend && !isHoliday) { // 平日のみタスクを生成
+                    const taskExists = tasks.some(t => t.templateId === template.id && t.dueDate === dueDateString);
+
+                    if (!taskExists) {
+                        const newTask = {
+                            id: Date.now() + Math.random(),
+                            templateId: template.id,
+                            text: template.text,
+                            completed: false,
+                            dueDate: dueDateString,
+                            recurrence: null,
+                            tags: template.tags || [], // タグを継承
+                            priority: template.priority || 'none', // 優先度を継承
+                            createdAt: Date.now()
+                        };
+                        tasks.push(newTask);
+                        newTasksGenerated = true;
+                    }
+                }
+                // --------------------------
+            }
+        }
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        template.recurrence.lastGenerated = `${yyyy}-${mm}-${dd}`;
+    }
+
+    if (newTasksGenerated) {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const taskInput = document.getElementById('task-input');
@@ -540,93 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const generateRecurringTasks = async () => { // asyncキーワードを追加
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        let newTasksGenerated = false;
-
-        // --- 祝日APIからデータを取得 ---
-        let holidays = {};
-        try {
-            const response = await fetch('https://holidays-jp.github.io/api/v1/date.json');
-            if (response.ok) {
-                holidays = await response.json();
-            } else {
-                console.error('祝日APIの取得に失敗しました。');
-            }
-        } catch (error) {
-            console.error('祝日APIへの接続中にエラーが発生しました:', error);
-        }
-        // ------------------------------
-
-        const templates = tasks.filter(t => t.recurrence && t.recurrence.type !== 'none');
-
-        for (const template of templates) { // for...of ループに変更して非同期処理に対応
-            let lastGenerated = template.recurrence.lastGenerated ? new Date(template.recurrence.lastGenerated) : new Date(parseInt(template.id));
-            lastGenerated.setHours(0, 0, 0, 0);
-
-            let nextDueDate = new Date(lastGenerated);
-
-            while (nextDueDate < today) {
-                // Calculate the next occurrence date
-                switch (template.recurrence.type) {
-                    case 'daily':
-                        nextDueDate.setDate(nextDueDate.getDate() + 1);
-                        break;
-                    case 'weekly':
-                        do {
-                            nextDueDate.setDate(nextDueDate.getDate() + 1);
-                        } while (!template.recurrence.days.includes(nextDueDate.getDay()));
-                        break;
-                    case 'monthly':
-                        nextDueDate = new Date(nextDueDate.getFullYear(), nextDueDate.getMonth() + 1, template.recurrence.day);
-                        break;
-                }
-
-                if (nextDueDate <= today) {
-                    const yyyy = nextDueDate.getFullYear();
-                    const mm = String(nextDueDate.getMonth() + 1).padStart(2, '0');
-                    const dd = String(nextDueDate.getDate()).padStart(2, '0');
-                    const dueDateString = `${yyyy}-${mm}-${dd}`;
-
-                    // --- 土日・祝日チェック ---
-                    const dayOfWeek = nextDueDate.getDay();
-                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                    const isHoliday = holidays[dueDateString];
-
-                    if (!isWeekend && !isHoliday) { // 平日のみタスクを生成
-                        const taskExists = tasks.some(t => t.templateId === template.id && t.dueDate === dueDateString);
-
-                        if (!taskExists) {
-                            const newTask = {
-                                id: Date.now() + Math.random(),
-                                templateId: template.id,
-                                text: template.text,
-                                completed: false,
-                                dueDate: dueDateString,
-                                recurrence: null,
-                                tags: template.tags || [], // タグを継承
-                                priority: template.priority || 'none', // 優先度を継承
-                                createdAt: Date.now()
-                            };
-                            tasks.push(newTask);
-                            newTasksGenerated = true;
-                        }
-                    }
-                    // --------------------------
-                }
-            }
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            template.recurrence.lastGenerated = `${yyyy}-${mm}-${dd}`;
-        }
-
-        if (newTasksGenerated) {
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-        }
-    };
+    
 
     // --- UI & Filters ---
     const updateTaskCount = () => {
@@ -837,5 +841,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { populateTagFilters };
+    module.exports = { populateTagFilters, generateRecurringTasks };
 }

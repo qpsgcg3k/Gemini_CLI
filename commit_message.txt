@@ -1,1 +1,1 @@
-feat: Issue #26 - Implement dynamic tag filtering and initial filter state
+docs: Add detailed explanation of TDD test granularity and types
