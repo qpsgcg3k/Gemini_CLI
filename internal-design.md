@@ -16,6 +16,7 @@
 | 1.0.9    | 2025-07-21 | Gemini | Issue#25に伴うHTML構造の修正 |
 | 1.0.10   | 2025-07-23 | Gemini | Issue#26に伴うタグフィルタの連動、テスト環境導入、起動時フィルタ状態の修正 |
 | 1.0.11   | 2025-07-30 | Gemini | Issue#22に伴う、祝日API取得失敗時のエラーハンドリングを追加 |
+| 1.0.12   | 2025-07-31 | Gemini | Issue#13に伴う、祝日APIのキャッシュ機能の設計を追加 |
 
 ## 1. プロジェクト構成
 
@@ -52,6 +53,7 @@
 
 - **タスクリスト**: `localStorage` を使用して、キー `tasks` にタスクデータの配列をJSON形式で保存・読み込みする。
 - **テーマ設定**: `localStorage` を使用して、キー `theme` に `'dark'` または `'light'` の文字列を保存・読み込みする。
+- **祝日情報キャッシュ**: `localStorage` を使用して、キー `holidayCache` に祝日データとタイムスタンプをJSON形式で保存・読み込みする。
 
 ## 3. 主要なJavaScript関数とロジック
 
@@ -120,7 +122,12 @@
 - **`updateTaskCount()`**:
     - `.completed` クラスを持たない `<li>` 要素の数を数え、表示を更新する。
 
-### 3.5. ドラッグ＆ドロップ
+### 3.4. 祝日関連処理
+
+- **`saveHolidaysToCache(holidays)`**: APIから取得した祝日情報にタイムスタンプを付与し、`localStorage`に`holidayCache`というキーで保存する。
+- **`loadHolidaysFromCache()`**: `localStorage`からキャッシュされた祝日情報を読み込む。データが破損している、または古い場合は`null`を返す。
+- **`getHolidays()`**: 祝日情報を取得するメイン関数。まずキャッシュの読み込みを試み、有効なキャッシュがあればそれを返す。なければAPIから取得し、成功した場合はキャッシュに保存してから返す。API取得に失敗し、キャッシュもない場合はユーザーに`alert`で通知し、`null`を返す。
+- **`generateRecurringTasks()`**: 祝日リストの取得処理を、`getHolidays()`の呼び出しに変更する。これにより、キャッシュ機能が透過的に利用される。
 
 - **`addDragAndDropListeners(item)`**:
     - `dragstart` と `dragend` イベントを各タスク要素に設定する。
