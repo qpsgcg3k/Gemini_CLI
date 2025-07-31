@@ -55,6 +55,56 @@ const populateTagFilters = (doc, tasks, filter = 'all', searchTerm = '') => {
 
 const HOLIDAY_API_ERROR_MESSAGE = '祝日APIの取得に失敗しました。オフラインの場合、祝日でもタスクが生成される可能性があります。';
 
+const saveHolidaysToCache = (holidays) => {
+    const cacheData = {
+        timestamp: new Date().toISOString(),
+        holidays: holidays,
+    };
+    localStorage.setItem('holidayCache', JSON.stringify(cacheData));
+};
+
+const loadHolidaysFromCache = () => {
+    const cacheString = localStorage.getItem('holidayCache');
+    if (!cacheString) return null;
+
+    try {
+        const cacheData = JSON.parse(cacheString);
+        // ここでキャッシュの有効期限チェックなどを追加することも可能
+        // 例: 1日以上経過していたら無効とみなす
+        // const cacheDate = new Date(cacheData.timestamp);
+        // const now = new Date();
+        // if ((now - cacheDate) > 24 * 60 * 60 * 1000) { // 24 hours
+        //     return null;
+        // }
+        return cacheData.holidays;
+    } catch (error) {
+        console.error('Error parsing holiday cache:', error);
+        return null;
+    }
+};
+
+const getHolidays = async () => {
+    const cachedHolidays = loadHolidaysFromCache();
+    if (cachedHolidays) {
+        return cachedHolidays;
+    }
+
+    try {
+        const response = await fetch('https://holidays-jp.github.io/api/v1/date.json');
+        if (response.ok) {
+            const holidays = await response.json();
+            saveHolidaysToCache(holidays);
+            return holidays;
+        } else {
+            alert(HOLIDAY_API_ERROR_MESSAGE);
+            return null; // APIエラー時はnullを返す
+        }
+    } catch (error) {
+        alert(HOLIDAY_API_ERROR_MESSAGE);
+        return null; // ネットワークエラー時もnullを返す
+    }
+};
+
 const generateRecurringTasks = async () => { // asyncキーワードを追加
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const today = new Date();
@@ -62,17 +112,7 @@ const generateRecurringTasks = async () => { // asyncキーワードを追加
     let newTasksGenerated = false;
 
     // --- 祝日APIからデータを取得 ---
-    let holidays = {};
-    try {
-        const response = await fetch('https://holidays-jp.github.io/api/v1/date.json');
-        if (response.ok) {
-            holidays = await response.json();
-        } else {
-            alert(HOLIDAY_API_ERROR_MESSAGE);
-        }
-    } catch (error) {
-        alert(HOLIDAY_API_ERROR_MESSAGE);
-    }
+    const holidays = await getHolidays() || {}; // getHolidaysを呼び出し、失敗した場合は空のオブジェクトを使用
     // ------------------------------
 
     const templates = tasks.filter(t => t.recurrence && t.recurrence.type !== 'none');
@@ -841,5 +881,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { populateTagFilters, generateRecurringTasks };
+    module.exports = { populateTagFilters, generateRecurringTasks, getHolidays };
 }
