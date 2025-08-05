@@ -1,3 +1,8 @@
 commit_msg.tmp
 /specs/
 /tasks.md
+
+.serena/
+_specs/
+_tasks/tasks.md
+commit_message.txt
