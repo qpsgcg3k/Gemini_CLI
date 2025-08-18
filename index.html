@@ -36,6 +36,33 @@
             </select>
         </div>
 
+        <div class="reminder-area">
+            <div id="notification-permission-alert" class="hidden">
+                <p>ブラウザの通知がブロックされています。リマインダー機能を使用するには、設定から通知を許可してください。</p>
+            </div>
+            <div class="reminder-toggle">
+                <input type="checkbox" id="reminder-enabled">
+                <label for="reminder-enabled">リマインダーを設定</label>
+            </div>
+            <div id="reminder-options" class="hidden">
+                <select id="reminder-type-select" aria-label="リマインダー種別">
+                    <option value="relative">相対日時</option>
+                    <option value="absolute">絶対日時</option>
+                </select>
+                <div id="reminder-value-relative">
+                    <input type="number" id="reminder-amount" min="1" value="30">
+                    <select id="reminder-unit">
+                        <option value="minutes">分前</option>
+                        <option value="hours">時間前</option>
+                        <option value="days">日前</option>
+                    </select>
+                </div>
+                <div id="reminder-value-absolute" class="hidden">
+                    <input type="datetime-local" id="reminder-datetime">
+                </div>
+            </div>
+        </div>
+
         <div class="search-area">
             <input type="text" id="search-input" placeholder="タスクを検索" aria-label="タスクを検索">
         </div>
