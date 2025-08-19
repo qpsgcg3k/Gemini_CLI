@@ -138,6 +138,20 @@ function initializeApp(document) {
     const reminderValueAbsoluteDiv = document.getElementById('reminder-value-absolute');
     const notificationPermissionAlert = document.getElementById('notification-permission-alert');
 
+    const loadTasks = () => {
+        const savedTasks = localStorage.getItem('tasks');
+        if (savedTasks) {
+            const tasks = JSON.parse(savedTasks);
+            tasks.forEach(task => {
+                const listItem = createTaskElement(document, task);
+                taskList.appendChild(listItem);
+            });
+        }
+    };
+
+    // Load tasks on startup
+    loadTasks();
+
     const checkNotificationPermission = () => {
         if (!('Notification' in window)) return;
 
