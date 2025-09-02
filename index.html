@@ -143,6 +143,42 @@
         </div>
     </div>
 
+    <!-- Reminder Modal -->
+    <div id="reminder-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" aria-label="閉じる">&times;</button>
+            <h2>リマインダー設定</h2>
+            <div class="reminder-options-modal">
+                <div class="reminder-toggle">
+                    <input type="checkbox" id="modal-reminder-enabled">
+                    <label for="modal-reminder-enabled">リマインダーを有効にする</label>
+                </div>
+                <div id="modal-reminder-options" class="hidden">
+                    <p id="modal-reminder-warning" class="hidden">注意：このタスクには期日が設定されていません。相対リマインダーは期日を基準に計算されるため、先に期日を設定してください。</p>
+                    <select id="modal-reminder-type-select" aria-label="リマインダー種別">
+                        <option value="relative">相対日時</option>
+                        <option value="absolute">絶対日時</option>
+                    </select>
+                    <div id="modal-reminder-value-relative">
+                        <input type="number" id="modal-reminder-amount" min="1" value="30">
+                        <select id="modal-reminder-unit">
+                            <option value="minutes">分前</option>
+                            <option value="hours">時間前</option>
+                            <option value="days">日前</option>
+                        </select>
+                    </div>
+                    <div id="modal-reminder-value-absolute" class="hidden">
+                        <input type="datetime-local" id="modal-reminder-datetime">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="save-reminder-button" aria-label="リマインダーを保存">保存</button>
+                <button id="cancel-reminder-button" aria-label="リマインダーをキャンセル">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

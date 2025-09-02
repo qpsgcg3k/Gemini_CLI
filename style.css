@@ -651,3 +651,8 @@ button:disabled {
     background-color: var(--bg-color);
     color: var(--text-color);
 }
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}

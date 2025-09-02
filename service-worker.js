@@ -9,14 +9,26 @@ self.addEventListener('message', (event) => {
         const title = 'リマインダー';
         const options = {
             body: `${task.text} の時間です`,
-            icon: '/path/to/your/icon.png', // TODO: アプリのアイコンパスを設定
             data: {
                 taskId: task.id,
-                url: '/' // TODO: アプリのタスク詳細URLを設定
+                url: '/'
             }
         };
 
-        event.waitUntil(self.registration.showNotification(title, options));
+        const promise = self.registration.showNotification(title, options).then(() => {
+            // 通知が表示されたら、クライアントに確認メッセージを送信
+            if (event.source) {
+                event.source.postMessage({ type: 'REMINDER_ACK', taskId: task.id });
+            }
+        }).catch((err) => {
+            console.error('Notification failed:', err);
+            // オプショナル：失敗したことをクライアントに通知する
+            if (event.source) {
+                event.source.postMessage({ type: 'REMINDER_FAILED', taskId: task.id, error: err.message });
+            }
+        });
+
+        event.waitUntil(promise);
     }
 });
 
@@ -26,7 +38,7 @@ self.addEventListener('notificationclick', (event) => {
     const urlToOpen = event.notification.data.url || '/'; // デフォルトはルートパス
 
     event.waitUntil(
-        clients.matchAll({ type: 'window' }).then(windowClients => {
+        self.clients.matchAll({ type: 'window' }).then(windowClients => {
             // 既存のウィンドウを探す
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
@@ -35,7 +47,7 @@ self.addEventListener('notificationclick', (event) => {
                 }
             }
             // 既存のウィンドウがなければ新しいウィンドウを開く
-            return clients.openWindow(urlToOpen);
+            return self.clients.openWindow(urlToOpen);
         })
     );
 });
