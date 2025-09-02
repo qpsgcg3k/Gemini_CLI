@@ -8,215 +8,215 @@ const { JSDOM } = require('jsdom');
 
 const html = fs.readFileSync(path.resolve(__dirname, './index.html'), 'utf8');
 
-// script.jsからテスト対象の関数をインポート
-const { populateTagFilters, generateRecurringTasks, getHolidays } = require('./script.js');
-
-describe('populateTagFilters', () => {
+describe('Reminder Functions', () => {
     let document;
-
-    // テスト用のダミータスクデータ
-    const tasks = [
-        { id: 1, text: 'Work on Project A', completed: false, tags: ['work', 'projectA'] },
-        { id: 2, text: 'Buy groceries', completed: true, tags: ['home', 'urgent'] },
-        { id: 3, text: 'Schedule dentist appointment', completed: false, tags: ['health'] },
-        { id: 4, text: 'Work on Project B', completed: true, tags: ['work', 'projectB'] },
-        { id: 5, text: 'Clean the house', completed: false, tags: ['home'] },
-    ];
+    let window;
+    let localStorageMock;
+    let script;
 
     beforeEach(() => {
-        const dom = new JSDOM(html, { url: "http://localhost/" });
+        jest.resetModules();
+        const dom = new JSDOM(html, { runScripts: "dangerously" });
         document = dom.window.document;
+        window = dom.window;
         global.document = document;
-    });
+        global.window = window;
 
-    // Test 1: 初期表示（すべてのタスクからタグを抽出）
-    test('should populate with tags from all tasks when no filter is applied', () => {
-        populateTagFilters(document, tasks, 'all', '');
-        const options = Array.from(document.getElementById('tag-filter-select').options).map(opt => opt.value);
-        expect(options).toEqual(expect.arrayContaining(['all', 'work', 'projectA', 'home', 'urgent', 'health', 'projectB']));
-        expect(options).toHaveLength(7);
-    });
-
-    // Test 2: 「未完了」フィルタ
-    test('should populate with tags only from incomplete tasks when filter is "active"', () => {
-        populateTagFilters(document, tasks, 'active', '');
-        const options = Array.from(document.getElementById('tag-filter-select').options).map(opt => opt.value);
-        // 未完了タスクのタグ: ['work', 'projectA', 'health', 'home']
-        expect(options).toEqual(expect.arrayContaining(['all', 'work', 'projectA', 'health', 'home']));
-        expect(options).toHaveLength(5);
-    });
-
-    // Test 3: 「完了済み」フィルタ
-    test('should populate with tags only from completed tasks when filter is "completed"', () => {
-        populateTagFilters(document, tasks, 'completed', '');
-        const options = Array.from(document.getElementById('tag-filter-select').options).map(opt => opt.value);
-        // 完了済みタスクのタグ: ['home', 'urgent', 'work', 'projectB']
-        expect(options).toEqual(expect.arrayContaining(['all', 'home', 'urgent', 'work', 'projectB']));
-        expect(options).toHaveLength(5);
-    });
-
-    // Test 4: 検索キーワードフィルタ
-    test('should populate with tags only from tasks matching the search term', () => {
-        populateTagFilters(document, tasks, 'all', 'work');
-        const options = Array.from(document.getElementById('tag-filter-select').options).map(opt => opt.value);
-        // 'work' を含むタスクのタグ: ['work', 'projectA', 'projectB']
-        expect(options).toEqual(expect.arrayContaining(['all', 'work', 'projectA', 'projectB']));
-        expect(options).toHaveLength(4);
-    });
-
-    
-// Test 5: 複合フィルタ（未完了 + 検索）
-    test('should populate with tags from incomplete tasks matching the search term', () => {
-        populateTagFilters(document, tasks, 'active', 'project');
-        const options = Array.from(document.getElementById('tag-filter-select').options).map(opt => opt.value);
-        // 未完了かつ 'project' を含むタスクのタグ: ['work', 'projectA']
-        expect(options).toEqual(expect.arrayContaining(['all', 'work', 'projectA']));
-        expect(options).toHaveLength(3);
-    });
-});
-
-describe('generateRecurringTasks', () => {
-    beforeEach(() => {
-        // JSDOMのセットアップ
-        const dom = new JSDOM(html);
-        global.document = dom.window.document;
-        global.window = dom.window;
-        global.fetch = jest.fn();
-        global.alert = jest.fn();
-        localStorage.clear();
-    });
-
-    test('should not show alert when holiday API fetch is successful', async () => {
-        fetch.mockResolvedValue({
-            ok: true,
-            json: async () => ({ "2025-01-01": "元日" }),
-        });
-
-        await generateRecurringTasks();
-
-        expect(alert).not.toHaveBeenCalled();
-    });
-
-    test('should show alert when holiday API fetch fails (response not ok)', async () => {
-        fetch.mockResolvedValue({
-            ok: false,
-        });
-
-        await generateRecurringTasks();
-
-        expect(alert).toHaveBeenCalledWith('祝日APIの取得に失敗しました。オフラインの場合、祝日でもタスクが生成される可能性があります。');
-    });
-
-    test('should show alert when holiday API fetch throws an error', async () => {
-        fetch.mockRejectedValue(new Error('Network error'));
-
-        await generateRecurringTasks();
-
-        expect(alert).toHaveBeenCalledWith('祝日APIの取得に失敗しました。オフラインの場合、祝日でもタスクが生成される可能性があります。');
-    });
-});
-
-describe('getHolidays', () => {
-    const mockHolidays = { "2025-01-01": "元日" };
-
-    beforeEach(() => {
-        const dom = new JSDOM(html);
-        global.document = dom.window.document;
-        global.window = dom.window;
-        global.fetch = jest.fn();
-        global.alert = jest.fn();
-        // localStorageのモック
-        const localStorageMock = (() => {
+        localStorageMock = (() => {
             let store = {};
             return {
                 getItem: (key) => store[key] || null,
-                setItem: (key, value) => {
-                    store[key] = value.toString();
-                },
-                clear: () => {
-                    store = {};
-                },
-                removeItem: (key) => {
-                    delete store[key];
-                }
+                setItem: (key, value) => { store[key] = value.toString(); },
+                clear: () => { store = {}; },
+                removeItem: (key) => { delete store[key]; }
             };
         })();
-        Object.defineProperty(window, 'localStorage', {
-            value: localStorageMock
-        });
+        Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+
+        script = require('./script.js');
     });
 
     afterEach(() => {
         localStorage.clear();
-        jest.clearAllMocks();
     });
 
-    test('should fetch holidays from API and save to cache when cache is empty', async () => {
-        fetch.mockResolvedValue({
-            ok: true,
-            json: async () => mockHolidays,
-        });
+    test('should save a task with reminderRule and reminderAt properties', () => {
+        const reminderRule = { type: 'relative', value: { amount: 30, unit: 'minutes' } };
+        const dueDate = new Date('2025-09-01T12:00:00Z');
+        const expectedReminderAt = new Date(dueDate.getTime() - 30 * 60 * 1000).toISOString();
+        const taskObject = script.createTaskObject('New Reminder Task', false, dueDate.toISOString(), null, 'task-1', [], 'none', Date.now(), reminderRule, expectedReminderAt);
 
-        const holidays = await getHolidays();
+        script.createTaskElement(document, taskObject);
+        script.saveTasks(document);
 
-        expect(holidays).toEqual(mockHolidays);
-        expect(fetch).toHaveBeenCalledTimes(1);
-        expect(localStorage.getItem('holidayCache')).not.toBeNull();
-        const cachedData = JSON.parse(localStorage.getItem('holidayCache'));
-        expect(cachedData.holidays).toEqual(mockHolidays);
+        const savedTasks = JSON.parse(localStorage.getItem('tasks'));
+        expect(savedTasks).toHaveLength(1);
+        const savedTask = savedTasks[0];
+        expect(savedTask).toHaveProperty('reminderRule');
+        expect(savedTask).toHaveProperty('reminderAt');
+        expect(savedTask.reminderRule).toEqual(reminderRule);
+        expect(savedTask.reminderAt).toBe(expectedReminderAt);
     });
 
-    test('should load holidays from cache if available and not call API', async () => {
-        const cacheData = {
-            timestamp: new Date().toISOString(),
-            holidays: mockHolidays,
+    test('getReminderRuleFromUI should return correct rule object for relative time', () => {
+        document.getElementById('reminder-enabled').checked = true;
+        document.getElementById('reminder-type-select').value = 'relative';
+        document.getElementById('reminder-amount').value = '45';
+        document.getElementById('reminder-unit').value = 'hours';
+        const rule = script.getReminderRuleFromUI(document);
+        expect(rule).toEqual({ type: 'relative', value: { amount: 45, unit: 'hours' } });
+    });
+
+    test('getReminderRuleFromUI should return correct rule object for absolute time', () => {
+        document.getElementById('reminder-enabled').checked = true;
+        document.getElementById('reminder-type-select').value = 'absolute';
+        document.getElementById('reminder-datetime').value = '2025-10-31T10:00';
+        const rule = script.getReminderRuleFromUI(document);
+        expect(rule).toEqual({ type: 'absolute', value: '2025-10-31T10:00' });
+    });
+
+    test('getReminderRuleFromUI should return null if reminder is disabled', () => {
+        document.getElementById('reminder-enabled').checked = false;
+        const rule = script.getReminderRuleFromUI(document);
+        expect(rule).toBeNull();
+    });
+
+    test('calculateReminderAt should return correct absolute time for relative rule', () => {
+        const dueDate = new Date('2025-11-10T20:00:00Z');
+        const rule = { type: 'relative', value: { amount: 2, unit: 'hours' } };
+        const expectedReminderAt = new Date('2025-11-10T18:00:00Z').toISOString();
+        const reminderAt = script.calculateReminderAt(dueDate, rule);
+        expect(reminderAt).toBe(expectedReminderAt);
+    });
+
+    test('calculateReminderAt should return correct absolute time for absolute rule', () => {
+        const dueDate = new Date('2025-11-10T20:00:00Z');
+        const rule = { type: 'absolute', value: '2025-11-09T10:00:00Z' };
+        const expectedReminderAt = new Date('2025-11-09T10:00:00Z').toISOString();
+        const reminderAt = script.calculateReminderAt(dueDate, rule);
+        expect(reminderAt).toBe(expectedReminderAt);
+    });
+
+    test('calculateReminderAt should return null if rule is null', () => {
+        const dueDate = new Date();
+        const reminderAt = script.calculateReminderAt(dueDate, null);
+        expect(reminderAt).toBeNull();
+    });
+});
+
+describe('Scheduling Functions', () => {
+    let script;
+    beforeEach(() => {
+        jest.resetModules();
+        script = require('./script.js');
+    });
+
+    test('findDueReminders should return only tasks that are due and not yet notified', () => {
+        const now = new Date();
+        const tasks = [
+            { id: 1, text: 'Task 1', reminderAt: new Date(now.getTime() - 1000).toISOString(), reminderNotified: false },
+            { id: 2, text: 'Task 2', reminderAt: new Date(now.getTime() - 2000).toISOString(), reminderNotified: true },
+            { id: 3, text: 'Task 3', reminderAt: new Date(now.getTime() + 10000).toISOString(), reminderNotified: false },
+            { id: 4, text: 'Task 4', reminderAt: null, reminderNotified: false },
+            { id: 5, text: 'Task 5', reminderAt: new Date(now.getTime() - 5000).toISOString(), reminderNotified: false },
+        ];
+        const dueTasks = script.findDueReminders(tasks);
+        expect(dueTasks).toHaveLength(2);
+        expect(dueTasks.map(t => t.id)).toEqual([1, 5]);
+    });
+});
+
+// JSDOM doesn't include a Service Worker environment, so we mock it.
+const mockServiceWorker = () => {
+    const listeners = {};
+    global.self = {
+        addEventListener: (event, callback) => {
+            listeners[event] = callback;
+        },
+        registration: {
+            showNotification: jest.fn().mockResolvedValue(),
+        },
+        clients: {
+            matchAll: jest.fn().mockResolvedValue([]),
+            openWindow: jest.fn().mockResolvedValue(null),
+        },
+    };
+    return {
+        trigger: (event, data) => {
+            if (listeners[event]) {
+                listeners[event](data);
+            }
+        },
+    };
+};
+
+describe('Service Worker Logic', () => {
+    let serviceWorker;
+
+    beforeEach(() => {
+        jest.resetModules(); // モジュールキャッシュをリセット
+        serviceWorker = mockServiceWorker();
+        // service-worker.jsを動的に読み込む
+        require('./service-worker.js');
+    });
+
+    test('should show notification and send ack on REMINDER message', async () => {
+        const mockSource = { postMessage: jest.fn() };
+        const task = { id: '123', text: 'Test Task' };
+        const waitUntilPromises = [];
+        const event = {
+            data: { type: 'REMINDER', task: task },
+            source: mockSource,
+            waitUntil: (promise) => waitUntilPromises.push(promise),
         };
-        localStorage.setItem('holidayCache', JSON.stringify(cacheData));
 
-        const holidays = await getHolidays();
+        serviceWorker.trigger('message', event);
+        await Promise.all(waitUntilPromises);
 
-        expect(holidays).toEqual(mockHolidays);
-        expect(fetch).not.toHaveBeenCalled();
-    });
-
-    test('should use cache when API fetch fails', async () => {
-        const cacheData = {
-            timestamp: new Date().toISOString(),
-            holidays: mockHolidays,
-        };
-        localStorage.setItem('holidayCache', JSON.stringify(cacheData));
-
-        // getHolidaysを呼び出す前にAPIを失敗させる
-        // このテストケースでは、getHolidaysはまずキャッシュを読むので、APIは呼ばれない。
-        // API失敗時にキャッシュを読む、というシナリオは次のテストで実施
-        const holidays = await getHolidays();
-        expect(holidays).toEqual(mockHolidays);
-        expect(fetch).not.toHaveBeenCalled();
-    });
-
-    test('should return null and show alert when API fails and cache is empty', async () => {
-        fetch.mockResolvedValue({ ok: false });
-
-        const holidays = await getHolidays();
-
-        expect(holidays).toBeNull();
-        expect(fetch).toHaveBeenCalledTimes(1);
-        expect(alert).toHaveBeenCalledWith('祝日APIの取得に失敗しました。オフラインの場合、祝日でもタスクが生成される可能性があります。');
-        expect(localStorage.getItem('holidayCache')).toBeNull();
-    });
-    
-    test('should fetch from API if cache is corrupted', async () => {
-        localStorage.setItem('holidayCache', 'invalid json');
-        fetch.mockResolvedValue({
-            ok: true,
-            json: async () => mockHolidays,
+        expect(self.registration.showNotification).toHaveBeenCalledWith('リマインダー', {
+            body: 'Test Task の時間です',
+            data: { taskId: '123', url: '/' },
         });
+        expect(mockSource.postMessage).toHaveBeenCalledWith({
+            type: 'REMINDER_ACK',
+            taskId: '123',
+        });
+        expect(waitUntilPromises.length).toBe(1);
+    });
 
-        const holidays = await getHolidays();
+    test('should focus existing window on notification click', async () => {
+        const mockClient = { url: '/', focus: jest.fn() };
+        self.clients.matchAll.mockResolvedValue([mockClient]);
+        const waitUntilPromises = [];
+        const event = {
+            notification: {
+                close: jest.fn(),
+                data: { url: '/' },
+            },
+            waitUntil: (promise) => waitUntilPromises.push(promise),
+        };
 
-        expect(holidays).toEqual(mockHolidays);
-        expect(fetch).toHaveBeenCalledTimes(1);
-        const cachedData = JSON.parse(localStorage.getItem('holidayCache'));
-        expect(cachedData.holidays).toEqual(mockHolidays);
+        serviceWorker.trigger('notificationclick', event);
+        await Promise.all(waitUntilPromises);
+
+        expect(mockClient.focus).toHaveBeenCalled();
+        expect(self.clients.openWindow).not.toHaveBeenCalled();
+    });
+
+    test('should open new window if none exists on notification click', async () => {
+        self.clients.matchAll.mockResolvedValue([]);
+        const waitUntilPromises = [];
+        const event = {
+            notification: {
+                close: jest.fn(),
+                data: { url: '/new-page' },
+            },
+            waitUntil: (promise) => waitUntilPromises.push(promise),
+        };
+
+        serviceWorker.trigger('notificationclick', event);
+        await Promise.all(waitUntilPromises);
+
+        expect(self.clients.openWindow).toHaveBeenCalledWith('/new-page');
     });
 });

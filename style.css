@@ -184,11 +184,9 @@ input:checked + .slider:before {
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* shadow-lg */
 }
 
-
-
 #task-count {
     color: var(--gray-600); /* Text caption */
-    white-space: nowrap; /* テキストの折り返しを防ぐ */
+    white-space: nowrap; 
 }
 
 li {
@@ -371,7 +369,6 @@ button {
     background-color: var(--container-bg-color); /* Default background */
 }
 
-/* 完了ボタンのスタイル */
 .finish-edit-button {
     background-color: var(--primary-color);
     color: white;
@@ -392,7 +389,6 @@ button {
     box-shadow: 0 0 0 3px var(--blue-500), 0 0 0 5px var(--white); /* ring-2 ring-blue-500 ring-offset-2 */
 }
 
-/* 新しい入力エリアのスタイル */
 .task-meta-input {
     display: flex;
     gap: 10px;
@@ -419,12 +415,11 @@ button {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-2 ring-blue-500 ring-opacity-20 */
 }
 
-/* タグと優先度の表示スタイル */
 .task-tags, .task-priority, .created-at {
     font-size: 12px;
     color: var(--gray-600); /* Text caption */
     margin-top: 2px;
-    display: block; /* 常にブロック要素として表示 */
+    display: block; 
 }
 
 .task-priority.priority-high {
@@ -440,7 +435,6 @@ button {
     color: var(--success-color);
 }
 
-/* 編集時の入力フィールドのスタイル */
 .edit-tag-input, .edit-priority-select {
     flex-grow: 1;
     font-size: 1em;
@@ -450,7 +444,7 @@ button {
     outline: none;
     background: transparent;
     color: var(--text-color);
-    margin-top: 5px; /* テキスト入力との間隔 */
+    margin-top: 5px; 
 }
 
 .edit-tag-input:focus, .edit-priority-select:focus {
@@ -458,10 +452,9 @@ button {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-2 ring-blue-500 ring-opacity-20 */
 }
 
-/* フィルタとソートエリアのスタイル */
 .filter-sort-area {
     display: flex;
-    flex-wrap: wrap; /* 小さい画面で折り返す */
+    flex-wrap: wrap; 
     gap: 16px;
     margin-top: 16px;
     justify-content: center;
@@ -625,4 +618,41 @@ button {
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* Reminder Styles */
+#reminder-options {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#reminder-options.hidden {
+    display: none;
+}
+
+.reminder-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#reminder-type-select,
+#reminder-amount,
+#reminder-unit,
+#reminder-datetime {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
 }
