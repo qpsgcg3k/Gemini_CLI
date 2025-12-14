@@ -195,3 +195,5 @@ const TaskItem = ({
     </li>
   );
 };
+
+export default TaskItem;
