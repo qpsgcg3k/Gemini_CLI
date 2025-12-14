@@ -1,15 +1,14 @@
-const { TextEncoder, TextDecoder } = require('util');
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+import fs from 'fs';
+import path from 'path';
+import { JSDOM } from 'jsdom';
+import { fileURLToPath } from 'url';
 
-const fs = require('fs');
-const path = require('path');
-const { JSDOM } = require('jsdom');
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const html = fs.readFileSync(path.resolve(__dirname, './index.html'), 'utf8');
 
 // script.jsからテスト対象の関数をインポート
-const { populateTagFilters, generateRecurringTasks, getHolidays } = require('./script.js');
+import { populateTagFilters, generateRecurringTasks, getHolidays } from './script.js';
 
 describe('populateTagFilters', () => {
     let document;
@@ -206,6 +205,7 @@ describe('getHolidays', () => {
     });
     
     test('should fetch from API if cache is corrupted', async () => {
+        jest.spyOn(console, 'error').mockImplementation(() => {}); // console.errorを抑制
         localStorage.setItem('holidayCache', 'invalid json');
         fetch.mockResolvedValue({
             ok: true,
@@ -218,5 +218,6 @@ describe('getHolidays', () => {
         expect(fetch).toHaveBeenCalledTimes(1);
         const cachedData = JSON.parse(localStorage.getItem('holidayCache'));
         expect(cachedData.holidays).toEqual(mockHolidays);
+        console.error.mockRestore(); // 抑制を解除
     });
 });

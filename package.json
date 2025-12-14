@@ -2,9 +2,12 @@
   "name": "gemini_cli",
   "version": "1.0.0",
   "description": "",
-  "main": "script.js",
+  "main": "src/main.jsx",
   "scripts": {
-    "test": "jest"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "repository": {
     "type": "git",
@@ -13,15 +16,25 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/qpsgcg3k/Gemini_CLI/issues"
   },
   "homepage": "https://github.com/qpsgcg3k/Gemini_CLI#readme",
+  "dependencies": {
+    "clsx": "^2.1.1"
+  },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.19",
     "jest": "^30.0.5",
-    "jest-environment-jsdom": "^30.0.5"
+    "jest-environment-jsdom": "^30.0.5",
+    "postcss": "^8.4.38",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.3",
+    "vite": "^5.2.0"
   }
 }
